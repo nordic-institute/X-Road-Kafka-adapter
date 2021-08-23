@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -59,15 +60,14 @@ public class SubscriptionsAPIController {
      * Subscribe to a Kafka topic.
      * @return
      */
-    @RequestMapping(method = POST, path = Constants.API_BASE_PATH + "/subscriptions",
+    @RequestMapping(method = POST, path = Constants.API_BASE_PATH + "/{topicName}/subscriptions",
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> subscribe(@RequestHeader(Constants.XRD_CLIENT_ID) String xrdClientId,
-                                            @RequestHeader(Constants.XRD_SERVICE_ID) String xrdServiceId) {
-        LOG.info("Subscribe to topic");
-        LOG.debug("X-Road-Client: {}", xrdClientId);
-        LOG.debug("X-Road-Service: {}", xrdServiceId);
-        String topicName = helperService.resolveTopicName(xrdServiceId);
-        ClientResponse response = proxyClient.subscribe(xrdClientId, xrdServiceId, topicName);
+                                            @PathVariable String topicName) {
+        LOG.info("Subscribe to topic \"{}\"", topicName);
+        LOG.debug("X-Road-Client: \"{}\"", xrdClientId);
+
+        ClientResponse response = proxyClient.subscribe(xrdClientId, topicName);
         return ResponseEntity.status(response.getStatusCode()).body(response.getData());
     }
 
@@ -75,14 +75,13 @@ public class SubscriptionsAPIController {
      * Unsubscribe from a Kafka topic.
      * @return
      */
-    @RequestMapping(method = DELETE, path = Constants.API_BASE_PATH + "/subscriptions",
+    @RequestMapping(method = DELETE, path = Constants.API_BASE_PATH + "/{topicName}/subscriptions",
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> unsubscribe(@RequestHeader(Constants.XRD_CLIENT_ID) String xrdClientId,
-                              @RequestHeader(Constants.XRD_SERVICE_ID) String xrdServiceId) {
-        LOG.info("Unsubscribe from topic");
-        LOG.debug("X-Road-Client: {}", xrdClientId);
-        LOG.debug("X-Road-Service: {}", xrdServiceId);
-        ClientResponse response = proxyClient.unsubscribe(xrdClientId);
+                                              @PathVariable String topicName) {
+        LOG.info("Unsubscribe from topic \"{}\"", topicName);
+        LOG.debug("X-Road-Client: \"{}\"", xrdClientId);
+        ClientResponse response = proxyClient.unsubscribe(xrdClientId, topicName);
         return ResponseEntity.status(response.getStatusCode()).body(response.getData());
     }
 }

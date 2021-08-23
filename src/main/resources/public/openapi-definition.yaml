@@ -14,7 +14,7 @@ info:
 servers:
   - url: /api/v1
     description: basepath for API v1
-  - url: http://xrd-kafka-adapter:8080/api/v1
+  - url: http://xrd-kafka-adapter:8080/api/v1/<KAFKA_TOPIC_NAME>
     description: Docker Compose API TEST URL for example requests
 paths:
   /subscriptions:
