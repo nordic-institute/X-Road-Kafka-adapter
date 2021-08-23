@@ -32,5 +32,5 @@ If customized properties are used, the host directory containing the properties 
 The Kafka REST proxy URL can be defined using the `app.kafka.rest-proxy-url=<PROXY_URL>` property.
 
 ```
-docker run -p 8080:8080 -e "JAVA_OPTS=-Dapp.kafka.broker-url=http://rest-proxy:8082" xrd-kafka-adapter
+docker run -p 8080:8080 -e "JAVA_OPTS=-Dapp.kafka.rest-proxy-url=http://rest-proxy:8082" xrd-kafka-adapter
 ```
