@@ -1,0 +1,26 @@
+*.class
+
+# Netbeans
+nbactions.xml
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+# Target dir
+target/
+src/.extract/
+
+# Other
+logs/
+.idea/
+*.iml
+
+# OSX
+.DS_Store
+.AppleDouble
+.LSOverride

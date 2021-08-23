@@ -1,0 +1,85 @@
+---
+openapi: 3.0.0
+info:
+  description: X-Road-Kafka Adapter API
+  version: "1.0.0"
+  title: X-Road-Kafka Adapter API
+  contact:
+    name: Nordic Institute for Interoperability Solutions (NIIS)
+    url: https://github.com/nordic-institute/xrd-kafka-xrdkafkaadapter
+    email: info@niis.org
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+servers:
+  - url: /api/v1
+    description: basepath for API v1
+  - url: http://xrd-kafka-adapter:8080/api/v1
+    description: Docker Compose API TEST URL for example requests
+paths:
+  /subscriptions:
+    post:
+      summary: subscribe to a topic
+      operationId: subscribe
+      responses:
+        '204':
+          description: request was successfull
+        '400':
+          description: request was invalid
+        '403':
+          description: request has been refused
+        '404':
+          description: resource requested does not exists
+        '406':
+          description: request specified an invalid format
+        '500':
+          description: internal server error
+    delete:
+      summary: unsubscribe from a topic
+      operationId: unsubscribe
+      responses:
+        '204':
+          description: request was successfull
+        '400':
+          description: request was invalid
+        '403':
+          description: request has been refused
+        '404':
+          description: resource requested does not exists
+        '406':
+          description: request specified an invalid format
+        '500':
+          description: internal server error
+  /records:
+    get:
+      summary: fetch data from a topic
+      operationId: fetch
+      responses:
+        '200':
+          description: request was successfull
+        '400':
+          description: request was invalid
+        '403':
+          description: request has been refused
+        '404':
+          description: resource requested does not exists
+        '406':
+          description: request specified an invalid format
+        '500':
+          description: internal server error
+    post:
+      summary: publish data to a topic
+      operationId: publish
+      responses:
+        '204':
+          description: request was successfull
+        '400':
+          description: request was invalid
+        '403':
+          description: request has been refused
+        '404':
+          description: resource requested does not exists
+        '406':
+          description: request specified an invalid format
+        '500':
+          description: internal server error
