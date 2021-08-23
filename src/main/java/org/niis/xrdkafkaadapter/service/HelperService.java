@@ -46,24 +46,6 @@ public class HelperService {
     private Environment env;
 
     /**
-     * Resolves the Kafka topic name of the given X-Road service identifier. The topic name may be defined in
-     * application.yml or it may be the X-Road service code. If no mapping between the service identifier and topic
-     * name is found in application.yml, the service cope is used as a topic name.
-     * @param serviceId X-Road service identifier in a format:
-     * "<instanceIdentifier>/<memberClass>/<memberCode>/<subsystemCode>/<serviceCode>".
-     * @return Kafka topic name for the given X-Road service identifier
-     */
-    public String resolveTopicName(String serviceId) {
-        String topicName = getServiceIdTopicMapping(serviceId);
-        if (topicName == null) {
-            LOG.debug("No match in service-id-topic-mapping. Use service code as topic name.");
-            topicName = serviceId.split("\\/")[SERVICE_CODE_INDEX];
-        }
-        LOG.debug("Kafka topic name is \"{}\"", topicName);
-        return topicName;
-    }
-
-    /**
      * Reads Kafka broker URL configuration property value. If the property hasn't been set, null is returned.
      * @return Kafka broker URL or null
      */
@@ -72,15 +54,24 @@ public class HelperService {
     }
 
     /**
+     * Reads Kafka REST proxy URL configuration property value. If the property hasn't been set, null is returned.
+     * @return Kafka REST proxy URL or null
+     */
+    public String getKafkaRESTProxyUrl() {
+        return env.getProperty(Constants.KAFKA_REST_PROXY_URL_PROPERTY_KEY);
+    }
+
+    /**
      * Converts X-Road client identifier to Kafka consumer group name using the following pattern:
      * "<instanceIdentifier>/<memberClass>/<memberCode>/<subsystemCode>"
      * =>
-     * "<instanceIdentifier>_<memberClass>_<memberCode>_<subsystemCode>_group"
+     * "<instanceIdentifier>_<memberClass>_<memberCode>_<subsystemCode>_<topicName>_group"
      * @param xrdClientId X-Road client identifier
+     * @param topicName Kafka topic name
      * @return X-Road client identifier converted to Kafka consumer group name
      */
-    public String getKafkaConsumerGroupName(String xrdClientId) {
-        return xrdClientId.replaceAll("\\/", "_") + Constants.KAFKA_CONSUMER_GROUP_POSTFIX;
+    public String getKafkaConsumerGroupName(String xrdClientId, String topicName) {
+        return xrdClientId.replaceAll("\\/", "_") + "_" + topicName + Constants.KAFKA_CONSUMER_GROUP_POSTFIX;
     }
 
     /**

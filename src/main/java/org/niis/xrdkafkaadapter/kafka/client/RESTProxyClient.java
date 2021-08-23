@@ -70,12 +70,11 @@ public class RESTProxyClient {
      * be replaced by the latest subscription.
      *
      * @param xrdClientId
-     * @param xrdServiceId
      * @param topicName
      */
-    public ClientResponse subscribe(String xrdClientId, String xrdServiceId, String topicName) {
+    public ClientResponse subscribe(String xrdClientId, String topicName) {
         // Generate Kafka consumer group and consumer instance names
-        String groupName = helperService.getKafkaConsumerGroupName(xrdClientId);
+        String groupName = helperService.getKafkaConsumerGroupName(xrdClientId, topicName);
         String instanceName = helperService.getKafkaConsumerInstanceName(xrdClientId);
 
         // Create request object and request target URL
@@ -114,11 +113,12 @@ public class RESTProxyClient {
      * 2. Destroy the consumer instance.
      *
      * @param xrdClientId
+     * @param topicName
      * @return
      */
-    public ClientResponse unsubscribe(String xrdClientId) {
+    public ClientResponse unsubscribe(String xrdClientId, String topicName) {
         // Generate Kafka consumer group and consumer instance names
-        String groupName = helperService.getKafkaConsumerGroupName(xrdClientId);
+        String groupName = helperService.getKafkaConsumerGroupName(xrdClientId, topicName);
         String instanceName = helperService.getKafkaConsumerInstanceName(xrdClientId);
 
         // Create request target URL
@@ -149,10 +149,11 @@ public class RESTProxyClient {
     /**
      * Consumer data from Kafka topic.
      * @param xrdClientId
+     * @param topicName
      */
-    public ClientResponse read(String xrdClientId) {
+    public ClientResponse read(String xrdClientId, String topicName) {
         // Generate Kafka consumer group and consumer instance names
-        String groupName = helperService.getKafkaConsumerGroupName(xrdClientId);
+        String groupName = helperService.getKafkaConsumerGroupName(xrdClientId, topicName);
         String instanceName = helperService.getKafkaConsumerInstanceName(xrdClientId);
 
         // Create request target URL
@@ -164,7 +165,7 @@ public class RESTProxyClient {
         Map<String, String> headers = new HashMap<>();
         headers.put(Constants.HTTP_HEADER_ACCEPT, Constants.CONTENT_TYPE_KAFKA_JSON_V2);
 
-        //  TODO: catch HttpHostConnectException
+        // Missing: catch HttpHostConnectException
         // Send read from topic request
         return restClient.send(consumerInstanceRecordsUrl, null, params, headers);
     }
@@ -206,7 +207,7 @@ public class RESTProxyClient {
 
     protected String buildConsumerGroupUrl(String consumerGroupName) {
         StringBuilder sb = new StringBuilder();
-        sb.append(helperService.getKafkaBrokerUrl()).append(CONSUMERS_PATH).append(consumerGroupName);
+        sb.append(helperService.getKafkaRESTProxyUrl()).append(CONSUMERS_PATH).append(consumerGroupName);
         return sb.toString();
     }
 
@@ -233,7 +234,7 @@ public class RESTProxyClient {
 
     protected String buildTopicUrl(String topicName) {
         StringBuilder sb = new StringBuilder();
-        sb.append(helperService.getKafkaBrokerUrl()).append(TOPICS_PATH).append(topicName);
+        sb.append(helperService.getKafkaRESTProxyUrl()).append(TOPICS_PATH).append(topicName);
         return sb.toString();
     }
 }

@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -60,14 +61,14 @@ public class RecordsAPIController {
      * Read records from Kafka topic.
      * @return
      */
-    @RequestMapping(method = GET, path = Constants.API_BASE_PATH + "/records",
+    @RequestMapping(method = GET, path = Constants.API_BASE_PATH + "/{topicName}/records",
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> read(@RequestHeader(Constants.XRD_CLIENT_ID) String xrdClientId,
-                                       @RequestHeader(Constants.XRD_SERVICE_ID) String xrdServiceId) {
-        LOG.info("Read records");
-        LOG.debug("X-Road-Client: {}", xrdClientId);
-        LOG.debug("X-Road-Service: {}", xrdServiceId);
-        ClientResponse response = proxyClient.read(xrdClientId);
+                                       @PathVariable String topicName) {
+        LOG.info("Read records from topic \"{}\"", topicName);
+        LOG.debug("X-Road-Client: \"{}\"", xrdClientId);
+
+        ClientResponse response = proxyClient.read(xrdClientId, topicName);
         return ResponseEntity.status(response.getStatusCode()).body(response.getData());
     }
 
@@ -75,15 +76,14 @@ public class RecordsAPIController {
      * Publish records to Kafka topic.
      * @return
      */
-    @RequestMapping(method = POST, path = Constants.API_BASE_PATH +  "/records",
+    @RequestMapping(method = POST, path = Constants.API_BASE_PATH +  "/{topicName}/records",
             produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> publish(@RequestHeader(Constants.XRD_CLIENT_ID) String xrdClientId,
-                          @RequestHeader(Constants.XRD_SERVICE_ID) String xrdServiceId,
-                          @RequestBody String messageBody) {
-        LOG.info("Publish records");
-        LOG.debug("X-Road-Client: {}", xrdClientId);
-        LOG.debug("X-Road-Service: {}", xrdServiceId);
-        String topicName = helperService.resolveTopicName(xrdServiceId);
+                                          @PathVariable String topicName,
+                                          @RequestBody String messageBody) {
+        LOG.info("Publish records to topic \"{}\"", topicName);
+        LOG.debug("X-Road-Client: \"{}\"", xrdClientId);
+
         ClientResponse response = proxyClient.publish(topicName, messageBody);
         return ResponseEntity.status(response.getStatusCode()).body(response.getData());
     }

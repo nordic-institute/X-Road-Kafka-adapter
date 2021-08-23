@@ -40,6 +40,8 @@ public final class Constants {
 
     public static final String KAFKA_BROKER_URL_PROPERTY_KEY = "app.kafka.broker-url";
 
+    public static final String KAFKA_REST_PROXY_URL_PROPERTY_KEY = "app.kafka.rest-proxy-url";
+
     public static final String KAFKA_CONSUMER_GROUP_POSTFIX = "_group";
 
     public static final String KAFKA_CONSUMER_INSTANCE_POSTFIX = "_instance";

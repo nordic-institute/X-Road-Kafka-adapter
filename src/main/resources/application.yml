@@ -1,5 +1,4 @@
 app:
   kafka:
-    broker-url: http://rest-proxy:8082
-  service-id-topic-mapping:
-    CS/ORG/1111/TestService/ServiceCode: example-topic
+    broker-url: http://broker:9092
+    rest-proxy-url: http://rest-proxy:8082
