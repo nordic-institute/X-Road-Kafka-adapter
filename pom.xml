@@ -111,17 +111,6 @@
             </plugin>
         </plugins>
     </build>
-    <developers>
-        <developer>
-            <id>petkivim</id>
-            <name>Petteri Kivimäki</name>
-            <roles>
-                <role>architect</role>
-                <role>developer</role>
-            </roles>
-            <timezone>+2</timezone>
-        </developer>
-    </developers>
     <repositories>
         <repository>
             <id>niis-repo</id>

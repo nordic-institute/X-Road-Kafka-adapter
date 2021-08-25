@@ -79,7 +79,7 @@ services:
     container_name: security-server
 
   xrd-kafka-adapter:
-    image: petkivim/xrd-kafka-adapter:latest
+    image: xrd-kafka-adapter
     depends_on:
       - rest-proxy
     ports:
