@@ -127,3 +127,5 @@ The Kafka REST proxy URL can be defined using the `app.kafka.rest-proxy-url=<PRO
 ```
 docker run -p 8080:8080 -e "JAVA_OPTS=-Dapp.kafka.rest-proxy-url=http://rest-proxy:8082" xrd-kafka-adapter
 ```
+
+After building the Docker image, it's also possible to run the Docker Compose example available [here](docker-compose/README.md).
