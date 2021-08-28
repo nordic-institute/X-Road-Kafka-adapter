@@ -21,24 +21,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.niis.xrdkafkaadapter.config;
+package org.niis.xrdkafkaadapter.controller;
 
-import org.springframework.boot.web.server.MimeMappings;
-import org.springframework.boot.web.server.WebServerFactoryCustomizer;
-import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory;
-import org.springframework.context.annotation.Configuration;
+import org.json.JSONObject;
+import org.springframework.core.convert.ConversionFailedException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
 /**
- * This class overrides Spring's default config.
+ * This is a global exception handler class.
  */
-@Configuration
-public class CustomServletConfiguration implements WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> {
+@ControllerAdvice
+public class GlobalControllerExceptionHandler {
 
-    @Override
-    public void customize(ConfigurableServletWebServerFactory factory) {
-        MimeMappings mappings = new MimeMappings(MimeMappings.DEFAULT);
-        mappings.remove("yaml");
-        mappings.add("yaml", "text/yaml;charset=utf-8");
-        factory.setMimeMappings(mappings);
+    @ExceptionHandler(ConversionFailedException.class)
+    public ResponseEntity<String> handleConflict(RuntimeException ex) {
+        return new ResponseEntity<>(buildInvalidParameterValueError().toString(), HttpStatus.BAD_REQUEST);
+    }
+
+    protected JSONObject buildInvalidParameterValueError() {
+        JSONObject json = new JSONObject();
+        json.put("message", "Invalid request parameter value");
+        return json;
     }
 }

@@ -21,24 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.niis.xrdkafkaadapter.config;
+package org.niis.xrdkafkaadapter.converter;
 
-import org.springframework.boot.web.server.MimeMappings;
-import org.springframework.boot.web.server.WebServerFactoryCustomizer;
-import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory;
-import org.springframework.context.annotation.Configuration;
+import org.niis.xrdkafkaadapter.model.OffsetResetPolicy;
+
+import org.springframework.core.convert.converter.Converter;
 
 /**
- * This class overrides Spring's default config.
+ * This class converts string to OffsetResetPolicy objects.
  */
-@Configuration
-public class CustomServletConfiguration implements WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> {
+public class StringToOffsetResetPolicyConverter implements Converter<String, OffsetResetPolicy> {
 
     @Override
-    public void customize(ConfigurableServletWebServerFactory factory) {
-        MimeMappings mappings = new MimeMappings(MimeMappings.DEFAULT);
-        mappings.remove("yaml");
-        mappings.add("yaml", "text/yaml;charset=utf-8");
-        factory.setMimeMappings(mappings);
+    public OffsetResetPolicy convert(String source) {
+        return OffsetResetPolicy.valueOf(source.toUpperCase());
     }
 }

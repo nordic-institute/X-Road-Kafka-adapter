@@ -80,10 +80,17 @@ After completing the initial configuration, you can use the following `curl` com
     ```
   
 - Subscribe to `MyTopic`.
-```
-curl -X POST -H 'X-Road-Client: CS/ORG/1111/TestClient' -i 'http://localhost/r1/CS/ORG/1111/TestService/MyTopic/subscriptions'
-```
 
+  - With default offset reset policy (`earliest`).
+    ```
+    curl -X POST -H 'X-Road-Client: CS/ORG/1111/TestClient' -i 'http://localhost/r1/CS/ORG/1111/TestService/MyTopic/subscriptions'
+    ```
+ 
+  - With the offset reset policy defined in the request (`earliest` / `latest`).
+    ```
+    curl -X POST -H 'X-Road-Client: CS/ORG/1111/TestClient' -i 'http://localhost/r1/CS/ORG/1111/TestService/MyTopic/subscriptions?offsetResetPolicy=latest'
+    ```
+      
 - Read data from `MyTopic`.
 ```
 curl -X GET -H 'X-Road-Client: CS/ORG/1111/TestClient' -i 'http://localhost/r1/CS/ORG/1111/TestService/MyTopic/records'

@@ -21,24 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.niis.xrdkafkaadapter.config;
-
-import org.springframework.boot.web.server.MimeMappings;
-import org.springframework.boot.web.server.WebServerFactoryCustomizer;
-import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory;
-import org.springframework.context.annotation.Configuration;
+package org.niis.xrdkafkaadapter.model;
 
 /**
- * This class overrides Spring's default config.
+ * This enum defines the supported alternatives for Kafka offset reset policy.
+ * The policy defines the initial position where consumption of the messages
+ * starts when a new consumer group is created.
  */
-@Configuration
-public class CustomServletConfiguration implements WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> {
-
-    @Override
-    public void customize(ConfigurableServletWebServerFactory factory) {
-        MimeMappings mappings = new MimeMappings(MimeMappings.DEFAULT);
-        mappings.remove("yaml");
-        mappings.add("yaml", "text/yaml;charset=utf-8");
-        factory.setMimeMappings(mappings);
-    }
+public enum OffsetResetPolicy {
+    EARLIEST, LATEST;
 }
