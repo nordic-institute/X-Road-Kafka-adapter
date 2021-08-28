@@ -97,8 +97,4 @@ public class HelperService {
     public String getKafkaConsumerInstanceName(String xrdClientId) {
         return xrdClientId.replaceAll("\\/", "_") + Constants.KAFKA_CONSUMER_INSTANCE_POSTFIX;
     }
-
-    private String getServiceIdTopicMapping(String serviceId) {
-        return env.getProperty(Constants.SERVICE_ID_TOPIC_MAPPING_PROPERTY_KEY + serviceId);
-    }
 }

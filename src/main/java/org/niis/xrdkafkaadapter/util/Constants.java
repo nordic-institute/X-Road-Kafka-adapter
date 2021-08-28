@@ -34,10 +34,6 @@ public final class Constants {
 
     public static final String XRD_CLIENT_ID = "X-Road-Client";
 
-    public static final String XRD_SERVICE_ID = "X-Road-Service";
-
-    public static final String SERVICE_ID_TOPIC_MAPPING_PROPERTY_KEY = "app.service-id-topic-mapping.";
-
     public static final String KAFKA_BROKER_URL_PROPERTY_KEY = "app.kafka.broker-url";
 
     public static final String KAFKA_REST_PROXY_URL_PROPERTY_KEY = "app.kafka.rest-proxy-url";
