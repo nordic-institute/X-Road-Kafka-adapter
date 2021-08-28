@@ -46,6 +46,18 @@ public class HelperService {
     private Environment env;
 
     /**
+     * Initialize new HelperService object.
+     */
+    public HelperService() { }
+
+    /**
+     * Initialize new HelperService object.
+     */
+    public HelperService(Environment environment) {
+        this.env = environment;
+    }
+
+    /**
      * Reads Kafka broker URL configuration property value. If the property hasn't been set, null is returned.
      * @return Kafka broker URL or null
      */
