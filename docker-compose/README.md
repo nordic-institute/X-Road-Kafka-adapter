@@ -51,7 +51,7 @@ docker-compose exec rest-proxy curl -X POST \
 
 - Click the Add REST button and create a new `OPENAPI` service using the following information:
   - URL type: `OpenAPI3 Description`
-  - URL: `http://xrd-kafka-adapter:8080/openapi-definition.yaml`
+  - URL: `http://xrd-kafka-adapter:8080/api/v1/MyTopic/openapi-definition.yaml`
   - Service code: `MyTopic`
 
 - Click save and enable the new service.

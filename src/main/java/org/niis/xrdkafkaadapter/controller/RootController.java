@@ -1,3 +1,4 @@
+
 /*
  * The MIT License
  *
@@ -23,11 +24,16 @@
  */
 package org.niis.xrdkafkaadapter.controller;
 
+import org.niis.xrdkafkaadapter.util.Constants;
+
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
- * This class implements a controller for the root path.
+ * This class implements a controller for the root path and
+ * a topic-specific endpoint to download the OpenAPI specification.
  *
  */
 @RestController
@@ -37,4 +43,10 @@ public class RootController {
     public String index() {
         return "";
     }
+
+    @GetMapping(path = Constants.API_BASE_PATH + "/{topicName}/openapi-definition.yaml")
+    public ModelAndView forwardToOpenAPISpecification() {
+        return new ModelAndView("forward:/openapi-definition.yaml");
+    }
 }
+

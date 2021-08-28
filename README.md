@@ -62,7 +62,9 @@ guarantees that regular X-Road messages provide.
 - In X-Road, Kafka topics are mapped to service codes. However, a single topic may be published using several different 
 service codes. The service code isn't directly linked to the topic name - there's no need to use the topic name as the
 service code. The topic that is linked to a service code is defined in the service base path.
-- Kafka topics can be published as `REST` or `OPENAPI` services on the Security Server.
+- Kafka topics can be published as `REST` or `OPENAPI3` services on the Security Server.
+  - When a new `OPENAPI3` service is added, the OpenAPI description URL is 
+  `http://<ADAPTER_HOST>:8080/api/v1/<topicName>/openapi-definition.yaml`.
   - Kafka topic name is included in the service base path and not in the endpoint path to enable easier access rights
   management. For example: 
     - Base path: `http://<ADAPTER_HOST>:8080/api/v1/<topicName>`
