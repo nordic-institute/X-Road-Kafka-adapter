@@ -26,6 +26,7 @@ package org.niis.xrdkafkaadapter.kafka.client;
 import org.niis.xrd4j.rest.ClientResponse;
 import org.niis.xrd4j.rest.client.RESTClient;
 import org.niis.xrd4j.rest.client.RESTClientFactory;
+import org.niis.xrdkafkaadapter.model.OffsetResetPolicy;
 import org.niis.xrdkafkaadapter.service.HelperService;
 import org.niis.xrdkafkaadapter.util.Constants;
 
@@ -71,14 +72,16 @@ public class RESTProxyClient {
      *
      * @param xrdClientId
      * @param topicName
+     * @param offsetResetPolicy
      */
-    public ClientResponse subscribe(String xrdClientId, String topicName) {
+    public ClientResponse subscribe(String xrdClientId, String topicName, OffsetResetPolicy offsetResetPolicy) {
         // Generate Kafka consumer group and consumer instance names
         String groupName = helperService.getKafkaConsumerGroupName(xrdClientId, topicName);
         String instanceName = helperService.getKafkaConsumerInstanceName(xrdClientId);
 
         // Create request object and request target URL
-        JSONObject createConsumerInstanceRequest = buildCreateConsumerInstanceRequest(instanceName);
+        JSONObject createConsumerInstanceRequest = buildCreateConsumerInstanceRequest(instanceName, offsetResetPolicy);
+        LOG.debug("Consumer instance request: {}", createConsumerInstanceRequest.toString());
         String consumerGroupUrl = buildConsumerGroupUrl(groupName);
 
         // Create REST client
@@ -100,6 +103,7 @@ public class RESTProxyClient {
 
         // Create request object and request target URL
         JSONObject subscribeToTopicRequest = buildSubscribeToTopicRequest(topicName);
+        LOG.debug("Subscribe to topic request: {}", subscribeToTopicRequest.toString());
         String subscriptionsUrl = buildSubscriptionsUrl(groupName, instanceName);
 
         // Send subscribe to topic request
@@ -189,11 +193,11 @@ public class RESTProxyClient {
         return restClient.send(topicsUrl, messageBody, params, headers);
     }
 
-    protected JSONObject buildCreateConsumerInstanceRequest(String instanceName) {
+    protected JSONObject buildCreateConsumerInstanceRequest(String instanceName, OffsetResetPolicy offsetResetPolicy) {
         JSONObject json = new JSONObject();
         json.put("name", instanceName);
         json.put("format", "json");
-        json.put("auto.offset.reset", "earliest"); // earliest | latest | none
+        json.put("auto.offset.reset", offsetResetPolicy.toString().toLowerCase()); // earliest | latest
         return json;
     }
 

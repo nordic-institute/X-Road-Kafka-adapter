@@ -25,6 +25,7 @@ package org.niis.xrdkafkaadapter.api.v1;
 
 import org.niis.xrd4j.rest.ClientResponse;
 import org.niis.xrdkafkaadapter.kafka.client.RESTProxyClient;
+import org.niis.xrdkafkaadapter.model.OffsetResetPolicy;
 import org.niis.xrdkafkaadapter.service.HelperService;
 import org.niis.xrdkafkaadapter.util.Constants;
 
@@ -36,6 +37,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
@@ -63,11 +65,13 @@ public class SubscriptionsAPIController {
     @RequestMapping(method = POST, path = Constants.API_BASE_PATH + "/{topicName}/subscriptions",
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> subscribe(@RequestHeader(Constants.XRD_CLIENT_ID) String xrdClientId,
-                                            @PathVariable String topicName) {
+                                            @PathVariable String topicName,
+                                            @RequestParam(defaultValue = "earliest") OffsetResetPolicy offsetResetPolicy) {
         LOG.info("Subscribe to topic \"{}\"", topicName);
         LOG.debug("X-Road-Client: \"{}\"", xrdClientId);
+        LOG.debug("Offset reset policy: \"{}\"", offsetResetPolicy);
 
-        ClientResponse response = proxyClient.subscribe(xrdClientId, topicName);
+        ClientResponse response = proxyClient.subscribe(xrdClientId, topicName, offsetResetPolicy);
         return ResponseEntity.status(response.getStatusCode()).body(response.getData());
     }
 

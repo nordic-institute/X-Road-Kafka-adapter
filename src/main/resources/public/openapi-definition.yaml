@@ -21,6 +21,15 @@ paths:
     post:
       summary: subscribe to a topic
       operationId: subscribe
+      parameters:
+        - in: query
+          name: offsetResetPolicy
+          description: Offset reset policy defines the initial position where consumption of the messages starts
+            when subscribing to a topic. The default value is "smallest" if the parameter is missing.
+          required: false
+          schema:
+            type: string
+            enum: [earliest, latest]
       responses:
         '204':
           description: request was successfull

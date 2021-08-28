@@ -23,22 +23,20 @@
  */
 package org.niis.xrdkafkaadapter.config;
 
-import org.springframework.boot.web.server.MimeMappings;
-import org.springframework.boot.web.server.WebServerFactoryCustomizer;
-import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory;
+import org.niis.xrdkafkaadapter.converter.StringToOffsetResetPolicyConverter;
+
 import org.springframework.context.annotation.Configuration;
+import org.springframework.format.FormatterRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
- * This class overrides Spring's default config.
+ * This class registers custom configurations.
  */
 @Configuration
-public class CustomServletConfiguration implements WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> {
+public class WebConfig implements WebMvcConfigurer {
 
     @Override
-    public void customize(ConfigurableServletWebServerFactory factory) {
-        MimeMappings mappings = new MimeMappings(MimeMappings.DEFAULT);
-        mappings.remove("yaml");
-        mappings.add("yaml", "text/yaml;charset=utf-8");
-        factory.setMimeMappings(mappings);
+    public void addFormatters(FormatterRegistry registry) {
+        registry.addConverter(new StringToOffsetResetPolicyConverter());
     }
 }
