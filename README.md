@@ -56,6 +56,9 @@ guarantees that regular X-Road messages provide.
 - Since the X-Road Message Protocol for REST is used, data streaming is not supported.
 - Currently, the Adapter doesn't support committing offsets. Therefore, it's assumed that Kafka consumers are 
   configured to use an automatic commit policy, which triggers a commit on a periodic interval.
+- The Adapter expects that incoming requests include the `X-Road-Client` HTTP header that specifies the client subsystem. 
+  Since the request comes from the Security Server, the content of the `X-Road-Client` header can be trusted. The client
+  identifier is used in Kafka consumer group name and consumer instance name.
 - In X-Road, Kafka topics are mapped to service codes. However, a single topic may be published using several different 
 service codes. The service code isn't directly linked to the topic name - there's no need to use the topic name as the
 service code. The topic that is linked to a service code is defined in the service base path.
