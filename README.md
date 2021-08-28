@@ -54,6 +54,8 @@ guarantees that regular X-Road messages provide.
   - Organization-level authentication, machine-level authentication, transport-level encryption, digital signature of 
   messages, eIDAS compliant eSeals with signatures and time-stamps.
 - Since the X-Road Message Protocol for REST is used, data streaming is not supported.
+- Currently, the Adapter doesn't support committing offsets. Therefore, it's assumed that Kafka consumers are 
+  configured to use an automatic commit policy, which triggers a commit on a periodic interval.
 - In X-Road, Kafka topics are mapped to service codes. However, a single topic may be published using several different 
 service codes. The service code isn't directly linked to the topic name - there's no need to use the topic name as the
 service code. The topic that is linked to a service code is defined in the service base path.
