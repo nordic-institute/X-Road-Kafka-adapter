@@ -90,5 +90,7 @@ paths:
           description: resource requested does not exists
         '406':
           description: request specified an invalid format
+        '415':
+          description: unsupported media type
         '500':
           description: internal server error

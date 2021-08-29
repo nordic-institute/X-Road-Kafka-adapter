@@ -26,6 +26,7 @@ package org.niis.xrdkafkaadapter.kafka.client;
 import org.niis.xrd4j.rest.ClientResponse;
 import org.niis.xrd4j.rest.client.RESTClient;
 import org.niis.xrd4j.rest.client.RESTClientFactory;
+import org.niis.xrdkafkaadapter.exception.RequestFailedException;
 import org.niis.xrdkafkaadapter.model.OffsetResetPolicy;
 import org.niis.xrdkafkaadapter.service.HelperService;
 import org.niis.xrdkafkaadapter.util.Constants;
@@ -49,6 +50,8 @@ import java.util.Map;
 public class RESTProxyClient {
 
     private static final Logger LOG = LoggerFactory.getLogger(RESTProxyClient.class);
+
+    private static final String REEQUEST_FAILED_ERROR_MESSAGE = "Sending request to REST Proxy failed.";
 
     private static final String CONSUMERS_PATH = "/consumers/";
 
@@ -88,7 +91,8 @@ public class RESTProxyClient {
      * @param topicName
      * @param offsetResetPolicy
      */
-    public ClientResponse subscribe(String xrdClientId, String topicName, OffsetResetPolicy offsetResetPolicy) {
+    public ClientResponse subscribe(String xrdClientId, String topicName, OffsetResetPolicy offsetResetPolicy)
+            throws RequestFailedException {
         // Generate Kafka consumer group and consumer instance names
         String groupName = helperService.getKafkaConsumerGroupName(xrdClientId, topicName);
         String instanceName = helperService.getKafkaConsumerInstanceName(xrdClientId);
@@ -106,6 +110,10 @@ public class RESTProxyClient {
 
         // Send create consumer instance request
         ClientResponse restResponse = restClient.send(consumerGroupUrl, createConsumerInstanceRequest.toString(), params, headers);
+        // If the request failed, the response is null
+        if (restResponse == null) {
+            throw new RequestFailedException(REEQUEST_FAILED_ERROR_MESSAGE);
+        }
 
         // Status codes 200 (OK) and 409 (Conflict) can be ignored. 409 means that consumer instance with the specified
         // name already exists. In case of other status code, return the response.
@@ -121,7 +129,12 @@ public class RESTProxyClient {
         String subscriptionsUrl = buildSubscriptionsUrl(groupName, instanceName);
 
         // Send subscribe to topic request
-        return restClient.send(subscriptionsUrl, subscribeToTopicRequest.toString(), params, headers);
+        restResponse = restClient.send(subscriptionsUrl, subscribeToTopicRequest.toString(), params, headers);
+        // If the request failed, the response is null
+        if (restResponse == null) {
+            throw new RequestFailedException(REEQUEST_FAILED_ERROR_MESSAGE);
+        }
+        return restResponse;
     }
 
     /**
@@ -134,7 +147,7 @@ public class RESTProxyClient {
      * @param topicName
      * @return
      */
-    public ClientResponse unsubscribe(String xrdClientId, String topicName) {
+    public ClientResponse unsubscribe(String xrdClientId, String topicName) throws RequestFailedException {
         // Generate Kafka consumer group and consumer instance names
         String groupName = helperService.getKafkaConsumerGroupName(xrdClientId, topicName);
         String instanceName = helperService.getKafkaConsumerInstanceName(xrdClientId);
@@ -150,6 +163,10 @@ public class RESTProxyClient {
 
         // Send unsubscribe from a topic request
         ClientResponse restResponse = restClient.send(subscriptionsUrl, null, params, headers);
+        // If the request failed, the response is null
+        if (restResponse == null) {
+            throw new RequestFailedException(REEQUEST_FAILED_ERROR_MESSAGE);
+        }
 
         // Status code 204 (No content) can be ignored. In case of other status code, return the response.
         if (restResponse.getStatusCode() != HttpStatus.SC_NO_CONTENT) {
@@ -161,7 +178,12 @@ public class RESTProxyClient {
         String consumerGroupInstanceUrl = buildConsumerGroupInstanceUrl(groupName, instanceName);
 
         // Send destroy a consumer instance request
-        return restClient.send(consumerGroupInstanceUrl, null, params, headers);
+        restResponse = restClient.send(consumerGroupInstanceUrl, null, params, headers);
+        // If the request failed, the response is null
+        if (restResponse == null) {
+            throw new RequestFailedException(REEQUEST_FAILED_ERROR_MESSAGE);
+        }
+        return restResponse;
     }
 
     /**
@@ -169,7 +191,7 @@ public class RESTProxyClient {
      * @param xrdClientId
      * @param topicName
      */
-    public ClientResponse read(String xrdClientId, String topicName) {
+    public ClientResponse read(String xrdClientId, String topicName) throws RequestFailedException {
         // Generate Kafka consumer group and consumer instance names
         String groupName = helperService.getKafkaConsumerGroupName(xrdClientId, topicName);
         String instanceName = helperService.getKafkaConsumerInstanceName(xrdClientId);
@@ -183,9 +205,13 @@ public class RESTProxyClient {
         Map<String, String> headers = new HashMap<>();
         headers.put(Constants.HTTP_HEADER_ACCEPT, Constants.CONTENT_TYPE_KAFKA_JSON_V2);
 
-        // Missing: catch HttpHostConnectException
         // Send read from topic request
-        return restClient.send(consumerInstanceRecordsUrl, null, params, headers);
+        ClientResponse restResponse = restClient.send(consumerInstanceRecordsUrl, null, params, headers);
+        // If the request failed, the response is null
+        if (restResponse == null) {
+            throw new RequestFailedException(REEQUEST_FAILED_ERROR_MESSAGE);
+        }
+        return restResponse;
     }
 
     /**
@@ -193,7 +219,7 @@ public class RESTProxyClient {
      * @param topicName
      * @param messageBody
      */
-    public ClientResponse publish(String topicName, String messageBody) {
+    public ClientResponse publish(String topicName, String messageBody) throws RequestFailedException {
         // Create request target URL
         String topicsUrl = buildTopicUrl(topicName);
 
@@ -204,7 +230,12 @@ public class RESTProxyClient {
         headers.put(Constants.HTTP_HEADER_CONTENT_TYPE, Constants.CONTENT_TYPE_KAFKA_JSON_V2);
 
         // Send read from topic request
-        return restClient.send(topicsUrl, messageBody, params, headers);
+        ClientResponse restResponse = restClient.send(topicsUrl, messageBody, params, headers);
+        // If the request failed, the response is null
+        if (restResponse == null) {
+            throw new RequestFailedException(REEQUEST_FAILED_ERROR_MESSAGE);
+        }
+        return restResponse;
     }
 
     protected JSONObject buildCreateConsumerInstanceRequest(String instanceName, OffsetResetPolicy offsetResetPolicy) {

@@ -34,6 +34,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
 
 /**
  * Test cases for HelperService class.
@@ -84,5 +85,11 @@ public class HelperServiceTest extends TestCase {
         String clientId = "PLAYGROUND/COM/1234567-8/Client";
         String consumerInstanceName = helperService.getKafkaConsumerInstanceName(clientId);
         Assert.assertEquals(expected, consumerInstanceName);
+    }
+
+    @Test
+    public void testWrapErrorMessageInJson() {
+        String json = helperService.wrapErrorMessageInJson(HttpStatus.GATEWAY_TIMEOUT.value(), "Error message");
+        Assert.assertEquals("{\"error_code\":504,\"message\":\"Error message\"}", json);
     }
 }

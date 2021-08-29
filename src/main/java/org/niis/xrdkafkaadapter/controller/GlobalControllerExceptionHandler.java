@@ -23,10 +23,18 @@
  */
 package org.niis.xrdkafkaadapter.controller;
 
-import org.json.JSONObject;
+import org.niis.xrdkafkaadapter.service.HelperService;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -36,14 +44,57 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class GlobalControllerExceptionHandler {
 
-    @ExceptionHandler(ConversionFailedException.class)
-    public ResponseEntity<String> handleConflict(RuntimeException ex) {
-        return new ResponseEntity<>(buildInvalidParameterValueError().toString(), HttpStatus.BAD_REQUEST);
+    private static final Logger LOG = LoggerFactory.getLogger(GlobalControllerExceptionHandler.class);
+
+    @Autowired
+    private HelperService helperService;
+
+    /**
+     * Handle HttpMediaTypeNotSupportedException exceptions.
+     * @param ex
+     * @return
+     */
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<String> handleHttpMediaTypeNotSupportedException(HttpMediaTypeNotSupportedException ex) {
+        LOG.warn(ex.getMessage());
+        String msg = helperService.wrapErrorMessageInJson(HttpStatus.UNSUPPORTED_MEDIA_TYPE.value(),
+                "Content type not supported");
+        return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).contentType(MediaType.APPLICATION_JSON).body(msg);
     }
 
-    protected JSONObject buildInvalidParameterValueError() {
-        JSONObject json = new JSONObject();
-        json.put("message", "Invalid request parameter value");
-        return json;
+    /**
+     * Handle MissingRequestHeaderException exceptions.
+     * @param ex
+     * @return
+     */
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public ResponseEntity<String> handleMissingRequestHeaderException(MissingRequestHeaderException ex) {
+        LOG.warn(ex.getMessage());
+        String msg = helperService.wrapErrorMessageInJson(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(msg);
+    }
+
+    /**
+     * Handle HttpRequestMethodNotSupportedException exceptions.
+     * @param ex
+     * @return
+     */
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<String> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException ex) {
+        LOG.warn(ex.getMessage());
+        String msg = helperService.wrapErrorMessageInJson(HttpStatus.METHOD_NOT_ALLOWED.value(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).contentType(MediaType.APPLICATION_JSON).body(msg);
+    }
+
+    /**
+     * Handle ConversionFailedException exceptions.
+     * @param ex
+     * @return
+     */
+    @ExceptionHandler(ConversionFailedException.class)
+    public ResponseEntity<String> handleConversionFailedException(RuntimeException ex) {
+        LOG.warn(ex.getMessage());
+        String msg = helperService.wrapErrorMessageInJson(HttpStatus.BAD_REQUEST.value(), "Invalid request parameter value");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(msg);
     }
 }

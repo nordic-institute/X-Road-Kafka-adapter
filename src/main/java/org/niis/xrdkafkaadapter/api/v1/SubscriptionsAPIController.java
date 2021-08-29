@@ -24,6 +24,7 @@
 package org.niis.xrdkafkaadapter.api.v1;
 
 import org.niis.xrd4j.rest.ClientResponse;
+import org.niis.xrdkafkaadapter.exception.RequestFailedException;
 import org.niis.xrdkafkaadapter.kafka.client.RESTProxyClient;
 import org.niis.xrdkafkaadapter.model.OffsetResetPolicy;
 import org.niis.xrdkafkaadapter.service.HelperService;
@@ -32,6 +33,7 @@ import org.niis.xrdkafkaadapter.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -70,9 +72,13 @@ public class SubscriptionsAPIController {
         LOG.info("Subscribe to topic \"{}\"", topicName);
         LOG.debug("X-Road-Client: \"{}\"", xrdClientId);
         LOG.debug("Offset reset policy: \"{}\"", offsetResetPolicy);
-
-        ClientResponse response = proxyClient.subscribe(xrdClientId, topicName, offsetResetPolicy);
-        return ResponseEntity.status(response.getStatusCode()).body(response.getData());
+        try {
+            ClientResponse response = proxyClient.subscribe(xrdClientId, topicName, offsetResetPolicy);
+            return ResponseEntity.status(response.getStatusCode()).body(response.getData());
+        } catch (RequestFailedException e) {
+            String msg = helperService.wrapErrorMessageInJson(HttpStatus.GATEWAY_TIMEOUT.value(), e.getMessage());
+            return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(msg);
+        }
     }
 
     /**
@@ -85,7 +91,12 @@ public class SubscriptionsAPIController {
                                               @PathVariable String topicName) {
         LOG.info("Unsubscribe from topic \"{}\"", topicName);
         LOG.debug("X-Road-Client: \"{}\"", xrdClientId);
-        ClientResponse response = proxyClient.unsubscribe(xrdClientId, topicName);
-        return ResponseEntity.status(response.getStatusCode()).body(response.getData());
+        try {
+            ClientResponse response = proxyClient.unsubscribe(xrdClientId, topicName);
+            return ResponseEntity.status(response.getStatusCode()).body(response.getData());
+        } catch (RequestFailedException e) {
+            String msg = helperService.wrapErrorMessageInJson(HttpStatus.GATEWAY_TIMEOUT.value(), e.getMessage());
+            return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(msg);
+        }
     }
 }
