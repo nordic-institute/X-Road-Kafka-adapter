@@ -25,8 +25,6 @@ package org.niis.xrdkafkaadapter.service;
 
 import org.niis.xrdkafkaadapter.util.Constants;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -36,10 +34,6 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class HelperService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(HelperService.class);
-
-    private static final int SERVICE_CODE_INDEX = 4;
 
     @Autowired
     private Environment env;
@@ -82,7 +76,9 @@ public class HelperService {
      * @return X-Road client identifier converted to Kafka consumer group name
      */
     public String getKafkaConsumerGroupName(String xrdClientId, String topicName) {
-        return xrdClientId.replaceAll("\\/", "_") + "_" + topicName + Constants.KAFKA_CONSUMER_GROUP_POSTFIX;
+        StringBuilder sb = new StringBuilder(xrdClientId.replaceAll("\\/", "_"));
+        sb.append("_").append(topicName).append(Constants.KAFKA_CONSUMER_GROUP_POSTFIX);
+        return  sb.toString();
     }
 
     /**
