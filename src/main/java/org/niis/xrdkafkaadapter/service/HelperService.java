@@ -25,6 +25,7 @@ package org.niis.xrdkafkaadapter.service;
 
 import org.niis.xrdkafkaadapter.util.Constants;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -91,5 +92,18 @@ public class HelperService {
      */
     public String getKafkaConsumerInstanceName(String xrdClientId) {
         return xrdClientId.replaceAll("\\/", "_") + Constants.KAFKA_CONSUMER_INSTANCE_POSTFIX;
+    }
+
+    /**
+     * Wraps an error message with a status code and message string in JSON.
+     * @param errorCode error status code
+     * @param message error message
+     * @return error message in JSON
+     */
+    public String wrapErrorMessageInJson(int errorCode, String message) {
+        JSONObject json = new JSONObject();
+        json.put("error_code", errorCode);
+        json.put("message", message);
+        return json.toString();
     }
 }
