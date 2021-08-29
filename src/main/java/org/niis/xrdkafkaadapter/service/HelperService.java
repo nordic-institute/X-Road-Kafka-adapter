@@ -33,7 +33,6 @@ import org.springframework.stereotype.Service;
 
 /**
  * This class provides helper services to other classes.
- *
  */
 @Service
 public class HelperService {
