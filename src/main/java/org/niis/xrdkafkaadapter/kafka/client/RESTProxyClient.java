@@ -64,6 +64,20 @@ public class RESTProxyClient {
     private HelperService helperService;
 
     /**
+     * Initialize new RESTProxyClient object.
+     */
+    public RESTProxyClient() { }
+
+    /**
+     * Initialize new RESTProxyClient object.
+     *
+     * @param helperService
+     */
+    public RESTProxyClient(HelperService helperService) {
+        this.helperService = helperService;
+    }
+
+    /**
      * Subscribe to Kafka topic. Subscription consists of two separate operations:
      *
      * 1. Create a new consumer instance in the consumer group.
