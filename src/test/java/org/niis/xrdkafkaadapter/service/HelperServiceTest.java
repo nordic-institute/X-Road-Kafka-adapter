@@ -44,7 +44,7 @@ public class HelperServiceTest extends TestCase {
 
     private static final String PROXY_URL = "http://localhost:8080";
 
-    private static final String BROKER_URL = "http://localhost:9092";
+    private static final String BROKER_ADDRESS = "localhost:9092";
 
     private HelperService helperService;
 
@@ -55,13 +55,13 @@ public class HelperServiceTest extends TestCase {
     public void setup() {
         helperService = new HelperService(environment);
         Mockito.when(environment.getProperty(Constants.KAFKA_REST_PROXY_URL_PROPERTY_KEY)).thenReturn(PROXY_URL);
-        Mockito.when(environment.getProperty(Constants.KAFKA_BROKER_URL_PROPERTY_KEY)).thenReturn(BROKER_URL);
+        Mockito.when(environment.getProperty(Constants.KAFKA_BROKER_ADDRESS_PROPERTY_KEY)).thenReturn(BROKER_ADDRESS);
     }
 
     @Test
-    public void testGetKafkaBrokerUrl() {
-        String url = helperService.getKafkaBrokerUrl();
-        Assert.assertEquals(BROKER_URL, url);
+    public void testGetKafkaBrokerAddress() {
+        String address = helperService.getKafkaBrokerAddress();
+        Assert.assertEquals(BROKER_ADDRESS, address);
     }
 
     @Test

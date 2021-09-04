@@ -52,11 +52,11 @@ public class HelperService {
     }
 
     /**
-     * Reads Kafka broker URL configuration property value. If the property hasn't been set, null is returned.
-     * @return Kafka broker URL or null
+     * Reads Kafka broker address configuration property value. If the property hasn't been set, null is returned.
+     * @return Kafka broker address or null
      */
-    public String getKafkaBrokerUrl() {
-        return env.getProperty(Constants.KAFKA_BROKER_URL_PROPERTY_KEY);
+    public String getKafkaBrokerAddress() {
+        return env.getProperty(Constants.KAFKA_BROKER_ADDRESS_PROPERTY_KEY);
     }
 
     /**
