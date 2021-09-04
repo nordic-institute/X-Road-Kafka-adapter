@@ -1,6 +1,6 @@
 app:
   kafka:
-    # If Kafka is running in a cluster then it's possible to provide comma (,) seperated addresses.
+    # If Kafka is running in a cluster then it's possible to provide comma (,) separated addresses.
     # For example: localhost:9091,localhost:9092
     broker-address: broker:9092
     rest-proxy-url: http://rest-proxy:8082
