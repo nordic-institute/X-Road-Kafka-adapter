@@ -66,6 +66,8 @@ docker-compose exec rest-proxy curl -X POST \
 ## Producing and Consuming Data
 
 After completing the initial configuration, you can use the following `curl` commands to access the topic through the Security Server.
+Regardless of the communication method between the Adapter and Kafka (REST Proxy or Kafka TCP client), the same `curl` commands will work.
+However, there are some minor differences in the response message fields.
 
 - Publish data to `MyTopic`.
 
