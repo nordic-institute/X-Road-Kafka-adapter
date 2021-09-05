@@ -41,11 +41,11 @@ import org.springframework.core.env.Environment;
  * Test cases for RESTProxyClient class.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class RESTProxyClientTest extends TestCase {
+public class RestProxyClientTest extends TestCase {
 
     private static final String BASE_URL = "http://localhost:8080";
 
-    private RESTProxyClient restProxyClient;
+    private RestProxyClient restProxyClient;
 
     private HelperService helperService;
 
@@ -55,7 +55,7 @@ public class RESTProxyClientTest extends TestCase {
     @Before
     public void setup() {
         helperService = new HelperService(environment);
-        restProxyClient = new RESTProxyClient(helperService);
+        restProxyClient = new RestProxyClient(helperService);
         Mockito.when(environment.getProperty(Constants.KAFKA_REST_PROXY_URL_PROPERTY_KEY)).thenReturn(BASE_URL);
     }
 

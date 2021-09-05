@@ -4,3 +4,5 @@ app:
     # For example: localhost:9091,localhost:9092
     broker-address: broker:9092
     rest-proxy-url: http://rest-proxy:8082
+    # Defines the Kafka client that the adapter uses: restProxyClient or tcpClient.
+    client-qualifier: restProxyClient

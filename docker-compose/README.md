@@ -76,7 +76,7 @@ After completing the initial configuration, you can use the following `curl` com
 
   - With a key.
     ```
-    curl -X POST -H 'X-Road-Client: CS/ORG/1111/TestClient' -H 'Content-Type: application/json' -i 'http://localhost/r1/CS/ORG/1111/TestService/MyTopic/records' --data '{"records":[{{"key":"test", "value":{"field1":"value1", "field2":"value2"}}]}'
+    curl -X POST -H 'X-Road-Client: CS/ORG/1111/TestClient' -H 'Content-Type: application/json' -i 'http://localhost/r1/CS/ORG/1111/TestService/MyTopic/records' --data '{"records":[{"key":"test", "value":{"field1":"value1", "field2":"value2"}}]}'
     ```
   
 - Subscribe to `MyTopic`.

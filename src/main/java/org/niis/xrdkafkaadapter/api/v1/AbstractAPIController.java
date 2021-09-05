@@ -21,32 +21,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.niis.xrdkafkaadapter.util;
+package org.niis.xrdkafkaadapter.api.v1;
+
+import org.niis.xrdkafkaadapter.kafka.client.KafkaClient;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Controller;
 
 /**
- * This class contains constants used in other classes.
+ * This abstract class implements a base class for API controllers.
+ *
  */
-public final class Constants {
+@Controller
+public abstract class AbstractAPIController {
 
-    private Constants() { }
+    @Value("${app.kafka.client-qualifier}")
+    private String kafkaClientQualifier;
 
-    public static final String API_BASE_PATH = "/api/v1";
+    protected KafkaClient kafkaClient;
 
-    public static final String XRD_CLIENT_ID = "X-Road-Client";
-
-    public static final String KAFKA_BROKER_ADDRESS_PROPERTY_KEY = "app.kafka.broker-address";
-
-    public static final String KAFKA_REST_PROXY_URL_PROPERTY_KEY = "app.kafka.rest-proxy-url";
-
-    public static final String KAFKA_CONSUMER_GROUP_POSTFIX = "_group";
-
-    public static final String KAFKA_CONSUMER_INSTANCE_POSTFIX = "_instance";
-
-    public static final String KAFKA_PRODUCER_CLIENT_ID_POSTFIX = "_producer";
-
-    public static final String HTTP_HEADER_CONTENT_TYPE = "Content-Type";
-
-    public static final String HTTP_HEADER_ACCEPT = "Accept";
-
-    public static final String CONTENT_TYPE_KAFKA_JSON_V2 = "application/vnd.kafka.json.v2+json";
+    /**
+     * Set Kafka client value.
+     * @param context
+     */
+    @Autowired
+    public void setKafkaClient(ApplicationContext context) {
+        kafkaClient = (KafkaClient) context.getBean(kafkaClientQualifier);
+    }
 }
