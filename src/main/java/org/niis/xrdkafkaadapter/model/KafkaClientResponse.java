@@ -21,32 +21,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.niis.xrdkafkaadapter.util;
+package org.niis.xrdkafkaadapter.model;
 
 /**
- * This class contains constants used in other classes.
+ * This class represents KafkaClient responses.
  */
-public final class Constants {
+public class KafkaClientResponse {
 
-    private Constants() { }
+    private String value;
 
-    public static final String API_BASE_PATH = "/api/v1";
+    /**
+     * Initialize new KafkaClientResponse object.
+     */
+    public KafkaClientResponse() { }
 
-    public static final String XRD_CLIENT_ID = "X-Road-Client";
+    /**
+     * Initialize new KafkaClientResponse object with the given value.
+     * @param value
+     */
+    public KafkaClientResponse(String value) {
+        this.value = value;
+    }
 
-    public static final String KAFKA_BROKER_ADDRESS_PROPERTY_KEY = "app.kafka.broker-address";
+    /**
+     * Get value.
+     * @return
+     */
+    public String getValue() {
+        return this.value;
+    }
 
-    public static final String KAFKA_REST_PROXY_URL_PROPERTY_KEY = "app.kafka.rest-proxy-url";
+    /**
+     * Set value.
+     * @param value
+     */
+    public void setValue(String value) {
+        this.value = value;
+    }
 
-    public static final String KAFKA_CONSUMER_GROUP_POSTFIX = "_group";
-
-    public static final String KAFKA_CONSUMER_INSTANCE_POSTFIX = "_instance";
-
-    public static final String KAFKA_PRODUCER_CLIENT_ID_POSTFIX = "_producer";
-
-    public static final String HTTP_HEADER_CONTENT_TYPE = "Content-Type";
-
-    public static final String HTTP_HEADER_ACCEPT = "Accept";
-
-    public static final String CONTENT_TYPE_KAFKA_JSON_V2 = "application/vnd.kafka.json.v2+json";
 }

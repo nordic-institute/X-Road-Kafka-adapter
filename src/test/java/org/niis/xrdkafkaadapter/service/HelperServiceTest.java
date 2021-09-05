@@ -88,6 +88,15 @@ public class HelperServiceTest extends TestCase {
     }
 
     @Test
+    public void testgetKafkaProducerClientId() {
+        String expected = "PLAYGROUND_ORG_2908758-4_TestClient_MyTopic" + Constants.KAFKA_PRODUCER_CLIENT_ID_POSTFIX;
+        String clientId = "PLAYGROUND/ORG/2908758-4/TestClient";
+        String topic = "MyTopic";
+        String consumerGroupName = helperService.getKafkaProducerClientId(clientId, topic);
+        Assert.assertEquals(expected, consumerGroupName);
+    }
+
+    @Test
     public void testWrapErrorMessageInJson() {
         String json = helperService.wrapErrorMessageInJson(HttpStatus.GATEWAY_TIMEOUT.value(), "Error message");
         Assert.assertEquals("{\"error_code\":504,\"message\":\"Error message\"}", json);

@@ -36,6 +36,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class HelperService {
 
+    public static final String XRD_CLIENT_ID_REGEX = "\\/";
+
+    public static final String XRD_CLIENT_ID_REPLACEMENT = "_";
+
     @Autowired
     private Environment env;
 
@@ -77,9 +81,9 @@ public class HelperService {
      * @return X-Road client identifier converted to Kafka consumer group name
      */
     public String getKafkaConsumerGroupName(String xrdClientId, String topicName) {
-        StringBuilder sb = new StringBuilder(xrdClientId.replaceAll("\\/", "_"));
-        sb.append("_").append(topicName).append(Constants.KAFKA_CONSUMER_GROUP_POSTFIX);
-        return  sb.toString();
+        StringBuilder sb = new StringBuilder(prepareXrdClientId(xrdClientId));
+        sb.append(XRD_CLIENT_ID_REPLACEMENT).append(topicName).append(Constants.KAFKA_CONSUMER_GROUP_POSTFIX);
+        return sb.toString();
     }
 
     /**
@@ -91,7 +95,22 @@ public class HelperService {
      * @return X-Road client identifier converted to Kafka consumer instance name
      */
     public String getKafkaConsumerInstanceName(String xrdClientId) {
-        return xrdClientId.replaceAll("\\/", "_") + Constants.KAFKA_CONSUMER_INSTANCE_POSTFIX;
+        return prepareXrdClientId(xrdClientId) + Constants.KAFKA_CONSUMER_INSTANCE_POSTFIX;
+    }
+
+    /**
+     * Converts X-Road client identifier to Kafka producer client ID using the following pattern:
+     * "<instanceIdentifier>/<memberClass>/<memberCode>/<subsystemCode>"
+     * =>
+     * "<instanceIdentifier>_<memberClass>_<memberCode>_<subsystemCode>_<topicName>_producer"
+     * @param xrdClientId X-Road client identifier
+     * @param topicName Kafka topic name
+     * @return X-Road client identifier converted to Kafka consumer group name
+     */
+    public String getKafkaProducerClientId(String xrdClientId, String topicName) {
+        StringBuilder sb = new StringBuilder(prepareXrdClientId(xrdClientId));
+        sb.append(XRD_CLIENT_ID_REPLACEMENT).append(topicName).append(Constants.KAFKA_PRODUCER_CLIENT_ID_POSTFIX);
+        return sb.toString();
     }
 
     /**
@@ -105,5 +124,18 @@ public class HelperService {
         json.put("error_code", errorCode);
         json.put("message", message);
         return json.toString();
+    }
+
+    /**
+     * Prepares the X-Road client ID to be used in Kafka identifiers. The conversion is done using the
+     * following pattern:
+     * "<instanceIdentifier>/<memberClass>/<memberCode>/<subsystemCode>"
+     * =>
+     * "<instanceIdentifier>_<memberClass>_<memberCode>_<subsystemCode>"
+     * @param xrdClientId X-Road client identifier
+     * @return
+     */
+    protected String prepareXrdClientId(String xrdClientId) {
+        return xrdClientId.replaceAll(XRD_CLIENT_ID_REGEX, XRD_CLIENT_ID_REPLACEMENT);
     }
 }

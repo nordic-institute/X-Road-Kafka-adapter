@@ -23,9 +23,10 @@
  */
 package org.niis.xrdkafkaadapter.api.v1;
 
-import org.niis.xrd4j.rest.ClientResponse;
+import org.niis.xrdkafkaadapter.exception.BadRequestException;
+import org.niis.xrdkafkaadapter.exception.ForbiddenRequestException;
 import org.niis.xrdkafkaadapter.exception.RequestFailedException;
-import org.niis.xrdkafkaadapter.kafka.client.RESTProxyClient;
+import org.niis.xrdkafkaadapter.model.KafkaClientResponse;
 import org.niis.xrdkafkaadapter.service.HelperService;
 import org.niis.xrdkafkaadapter.util.Constants;
 
@@ -49,15 +50,12 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
  *
  */
 @RestController
-public class RecordsAPIController {
+public class RecordsAPIController extends AbstractAPIController {
 
     private static final Logger LOG = LoggerFactory.getLogger(RecordsAPIController.class);
 
     @Autowired
     private HelperService helperService;
-
-    @Autowired
-    private RESTProxyClient proxyClient;
 
     /**
      * Read records from Kafka topic.
@@ -71,11 +69,14 @@ public class RecordsAPIController {
         LOG.debug("X-Road-Client: \"{}\"", xrdClientId);
 
         try {
-            ClientResponse response = proxyClient.read(xrdClientId, topicName);
-            return ResponseEntity.status(response.getStatusCode()).body(response.getData());
+            KafkaClientResponse response = kafkaClient.read(xrdClientId, topicName);
+            return ResponseEntity.status(HttpStatus.OK).body(response.getValue());
         } catch (RequestFailedException e) {
             String msg = helperService.wrapErrorMessageInJson(HttpStatus.GATEWAY_TIMEOUT.value(), e.getMessage());
             return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(msg);
+        } catch (ForbiddenRequestException e) {
+            String msg = helperService.wrapErrorMessageInJson(HttpStatus.FORBIDDEN.value(), e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(msg);
         }
     }
 
@@ -92,11 +93,14 @@ public class RecordsAPIController {
         LOG.debug("X-Road-Client: \"{}\"", xrdClientId);
 
         try {
-            ClientResponse response = proxyClient.publish(topicName, messageBody);
-            return ResponseEntity.status(response.getStatusCode()).body(response.getData());
+            KafkaClientResponse response = kafkaClient.publish(xrdClientId, topicName, messageBody);
+            return ResponseEntity.status(HttpStatus.OK).body(response.getValue());
         } catch (RequestFailedException e) {
             String msg = helperService.wrapErrorMessageInJson(HttpStatus.GATEWAY_TIMEOUT.value(), e.getMessage());
             return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(msg);
+        } catch (BadRequestException e) {
+            String msg = helperService.wrapErrorMessageInJson(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
         }
     }
 }

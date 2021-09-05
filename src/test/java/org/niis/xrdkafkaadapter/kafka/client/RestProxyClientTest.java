@@ -41,11 +41,11 @@ import org.springframework.core.env.Environment;
  * Test cases for RESTProxyClient class.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class RESTProxyClientTest extends TestCase {
+public class RestProxyClientTest extends TestCase {
 
     private static final String BASE_URL = "http://localhost:8080";
 
-    private RESTProxyClient restProxyClient;
+    private RestProxyClient restProxyClient;
 
     private HelperService helperService;
 
@@ -55,7 +55,7 @@ public class RESTProxyClientTest extends TestCase {
     @Before
     public void setup() {
         helperService = new HelperService(environment);
-        restProxyClient = new RESTProxyClient(helperService);
+        restProxyClient = new RestProxyClient(helperService);
         Mockito.when(environment.getProperty(Constants.KAFKA_REST_PROXY_URL_PROPERTY_KEY)).thenReturn(BASE_URL);
     }
 
@@ -65,14 +65,13 @@ public class RESTProxyClientTest extends TestCase {
         Assert.assertEquals("instanceName", json.getString("name"));
         Assert.assertEquals("json", json.getString("format"));
         Assert.assertEquals("latest", json.getString("auto.offset.reset"));
-        Assert.assertEquals("{\"name\":\"instanceName\",\"format\":\"json\",\"auto.offset.reset\":\"latest\"}", json.toString());
     }
 
     @Test
     public void testBuildSubscribeToTopicRequest() {
         JSONObject json = restProxyClient.buildSubscribeToTopicRequest("MyTopic");
         Assert.assertEquals("MyTopic", json.getJSONArray("topics").getString(0));
-        Assert.assertEquals("{\"topics\":[\"MyTopic\"]}", json.toString());
+        Assert.assertEquals(1, json.getJSONArray("topics").length());
     }
 
     @Test

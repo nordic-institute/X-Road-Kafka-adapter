@@ -23,9 +23,9 @@
  */
 package org.niis.xrdkafkaadapter.api.v1;
 
-import org.niis.xrd4j.rest.ClientResponse;
+import org.niis.xrdkafkaadapter.exception.ForbiddenRequestException;
 import org.niis.xrdkafkaadapter.exception.RequestFailedException;
-import org.niis.xrdkafkaadapter.kafka.client.RESTProxyClient;
+import org.niis.xrdkafkaadapter.model.KafkaClientResponse;
 import org.niis.xrdkafkaadapter.model.OffsetResetPolicy;
 import org.niis.xrdkafkaadapter.service.HelperService;
 import org.niis.xrdkafkaadapter.util.Constants;
@@ -50,15 +50,12 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
  *
  */
 @RestController
-public class SubscriptionsAPIController {
+public class SubscriptionsAPIController extends AbstractAPIController {
 
     private static final Logger LOG = LoggerFactory.getLogger(SubscriptionsAPIController.class);
 
     @Autowired
     private HelperService helperService;
-
-    @Autowired
-    private RESTProxyClient proxyClient;
 
     /**
      * Subscribe to a Kafka topic.
@@ -73,8 +70,8 @@ public class SubscriptionsAPIController {
         LOG.debug("X-Road-Client: \"{}\"", xrdClientId);
         LOG.debug("Offset reset policy: \"{}\"", offsetResetPolicy);
         try {
-            ClientResponse response = proxyClient.subscribe(xrdClientId, topicName, offsetResetPolicy);
-            return ResponseEntity.status(response.getStatusCode()).body(response.getData());
+            KafkaClientResponse response = kafkaClient.subscribe(xrdClientId, topicName, offsetResetPolicy);
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("");
         } catch (RequestFailedException e) {
             String msg = helperService.wrapErrorMessageInJson(HttpStatus.GATEWAY_TIMEOUT.value(), e.getMessage());
             return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(msg);
@@ -92,11 +89,14 @@ public class SubscriptionsAPIController {
         LOG.info("Unsubscribe from topic \"{}\"", topicName);
         LOG.debug("X-Road-Client: \"{}\"", xrdClientId);
         try {
-            ClientResponse response = proxyClient.unsubscribe(xrdClientId, topicName);
-            return ResponseEntity.status(response.getStatusCode()).body(response.getData());
+            KafkaClientResponse response = kafkaClient.unsubscribe(xrdClientId, topicName);
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("");
         } catch (RequestFailedException e) {
             String msg = helperService.wrapErrorMessageInJson(HttpStatus.GATEWAY_TIMEOUT.value(), e.getMessage());
             return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(msg);
+        } catch (ForbiddenRequestException e) {
+            String msg = helperService.wrapErrorMessageInJson(HttpStatus.FORBIDDEN.value(), e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(msg);
         }
     }
 }

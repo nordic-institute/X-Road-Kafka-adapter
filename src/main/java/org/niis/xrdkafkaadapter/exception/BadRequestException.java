@@ -21,32 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.niis.xrdkafkaadapter.util;
+package org.niis.xrdkafkaadapter.exception;
 
 /**
- * This class contains constants used in other classes.
+ * This class extends the Exception class and it represents a bad request received from the client.
  */
-public final class Constants {
+public class BadRequestException extends Exception  {
 
-    private Constants() { }
-
-    public static final String API_BASE_PATH = "/api/v1";
-
-    public static final String XRD_CLIENT_ID = "X-Road-Client";
-
-    public static final String KAFKA_BROKER_ADDRESS_PROPERTY_KEY = "app.kafka.broker-address";
-
-    public static final String KAFKA_REST_PROXY_URL_PROPERTY_KEY = "app.kafka.rest-proxy-url";
-
-    public static final String KAFKA_CONSUMER_GROUP_POSTFIX = "_group";
-
-    public static final String KAFKA_CONSUMER_INSTANCE_POSTFIX = "_instance";
-
-    public static final String KAFKA_PRODUCER_CLIENT_ID_POSTFIX = "_producer";
-
-    public static final String HTTP_HEADER_CONTENT_TYPE = "Content-Type";
-
-    public static final String HTTP_HEADER_ACCEPT = "Accept";
-
-    public static final String CONTENT_TYPE_KAFKA_JSON_V2 = "application/vnd.kafka.json.v2+json";
+    /**
+     * Constructs and initializes a new BadRequestException object
+     * with the given error message.
+     * @param message error message that's shown
+     */
+    public BadRequestException(final String message) {
+        super(message);
+    }
 }

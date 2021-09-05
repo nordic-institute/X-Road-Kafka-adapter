@@ -21,32 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.niis.xrdkafkaadapter.util;
+package org.niis.xrdkafkaadapter.kafka.client;
+
+import org.niis.xrdkafkaadapter.exception.BadRequestException;
+import org.niis.xrdkafkaadapter.exception.ForbiddenRequestException;
+import org.niis.xrdkafkaadapter.exception.RequestFailedException;
+import org.niis.xrdkafkaadapter.model.KafkaClientResponse;
+import org.niis.xrdkafkaadapter.model.OffsetResetPolicy;
 
 /**
- * This class contains constants used in other classes.
+ * This interface defines a client interface for Kafka.
  */
-public final class Constants {
+public interface KafkaClient {
 
-    private Constants() { }
+    KafkaClientResponse subscribe(String xrdClientId, String topicName, OffsetResetPolicy offsetResetPolicy)
+            throws RequestFailedException;
 
-    public static final String API_BASE_PATH = "/api/v1";
+    KafkaClientResponse unsubscribe(String xrdClientId, String topicName) throws RequestFailedException, ForbiddenRequestException;
 
-    public static final String XRD_CLIENT_ID = "X-Road-Client";
+    KafkaClientResponse read(String xrdClientId, String topicName) throws RequestFailedException, ForbiddenRequestException;
 
-    public static final String KAFKA_BROKER_ADDRESS_PROPERTY_KEY = "app.kafka.broker-address";
-
-    public static final String KAFKA_REST_PROXY_URL_PROPERTY_KEY = "app.kafka.rest-proxy-url";
-
-    public static final String KAFKA_CONSUMER_GROUP_POSTFIX = "_group";
-
-    public static final String KAFKA_CONSUMER_INSTANCE_POSTFIX = "_instance";
-
-    public static final String KAFKA_PRODUCER_CLIENT_ID_POSTFIX = "_producer";
-
-    public static final String HTTP_HEADER_CONTENT_TYPE = "Content-Type";
-
-    public static final String HTTP_HEADER_ACCEPT = "Accept";
-
-    public static final String CONTENT_TYPE_KAFKA_JSON_V2 = "application/vnd.kafka.json.v2+json";
+    KafkaClientResponse publish(String xrdClientId, String topicName, String messageBody) throws RequestFailedException, BadRequestException;
 }

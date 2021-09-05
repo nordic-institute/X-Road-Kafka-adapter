@@ -38,12 +38,13 @@ responses.
 
 ![](images/x-road-kafka-adapter-diagram-1.svg)
 
-However, in the current implementation the Adapter doesn't communicate with Kafka directly, yet. There's an additional 
-REST proxy component ([Confluent REST Proxy](https://github.com/confluentinc/kafka-rest)) that 
-sits between the Adapter and Kafka. In the upcoming versions of the X-Road-Kafka Adapter, the aim is to drop the 
-additional REST Proxy component and connect the Adapter to Kafka directly.
+Alternatively, the Adapter can communicate with Kafka through an additional REST proxy component 
+([Confluent REST Proxy](https://github.com/confluentinc/kafka-rest)) that sits between the Adapter and Kafka. 
 
 ![](images/x-road-kafka-adapter-diagram-2.svg)
+
+The Adapter supports both communication methods with Kafka. Regardless of the communication method, the REST API 
+provided by the Adapter is the same. The communication method can me selected in the Adapter's configuration.
 
 ## About the Implementation
 
@@ -80,6 +81,8 @@ client information systems, all the client information systems share the same Ka
 - Kafka is considered as any other information system connected to X-Road. Installing, configuring and operating Kafka 
 and/or Kafka cluster is out of the Adapter's scope. Also, Kafka management operations, e.g., creating new topics, is out
 of the Adapter's scope. The Adapter can be used to connect any existing or new Kafka instance/cluster to X-Road.
+- The Adapter is stateful which means that requests coming from the same client must always be processed by the same
+Adapter instance. 
 
 ## Software Requirements
 
@@ -133,6 +136,20 @@ The Kafka REST proxy URL can be defined using the `app.kafka.rest-proxy-url=<PRO
 
 ```
 docker run -p 8080:8080 -e "JAVA_OPTS=-Dapp.kafka.rest-proxy-url=http://rest-proxy:8082" xrd-kafka-adapter
+```
+
+The Kafka broker address can be defined using the `app.kafka.broker-address=<BROKER_ADDRESS>` property.
+
+```
+docker run -p 8080:8080 -e "JAVA_OPTS=-Dapp.kafka.broker-address=broker:8092" xrd-kafka-adapter
+```
+
+The communication method with Kafka (REST Proxy or Kafka TCP client) can be defined using the 
+`app.kafka.client-qualifier=<CLIENT_QUALIFIER>` property. Supported values for the `client-qualifier` are
+`restProxyClient` and `tcpClient`. If the property hasn't been defined, `restProxyClient` is used by default.
+
+```
+docker run -p 8080:8080 -e "JAVA_OPTS=-Dapp.kafka.broker-address=broker:8092 -Dapp.kafka.client-qualifier=tcpClient" xrd-kafka-adapter
 ```
 
 After building the Docker image, it's also possible to run the Docker Compose example available [here](docker-compose/README.md).
