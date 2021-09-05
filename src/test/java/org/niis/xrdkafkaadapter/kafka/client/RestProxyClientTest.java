@@ -65,14 +65,13 @@ public class RestProxyClientTest extends TestCase {
         Assert.assertEquals("instanceName", json.getString("name"));
         Assert.assertEquals("json", json.getString("format"));
         Assert.assertEquals("latest", json.getString("auto.offset.reset"));
-        Assert.assertEquals("{\"name\":\"instanceName\",\"format\":\"json\",\"auto.offset.reset\":\"latest\"}", json.toString());
     }
 
     @Test
     public void testBuildSubscribeToTopicRequest() {
         JSONObject json = restProxyClient.buildSubscribeToTopicRequest("MyTopic");
         Assert.assertEquals("MyTopic", json.getJSONArray("topics").getString(0));
-        Assert.assertEquals("{\"topics\":[\"MyTopic\"]}", json.toString());
+        Assert.assertEquals(1, json.getJSONArray("topics").length());
     }
 
     @Test
