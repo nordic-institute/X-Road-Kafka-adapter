@@ -29,6 +29,7 @@ import org.niis.xrd4j.rest.client.RESTClientFactory;
 import org.niis.xrdkafkaadapter.exception.BadRequestException;
 import org.niis.xrdkafkaadapter.exception.ForbiddenRequestException;
 import org.niis.xrdkafkaadapter.exception.RequestFailedException;
+import org.niis.xrdkafkaadapter.model.KafkaClientResponse;
 import org.niis.xrdkafkaadapter.model.OffsetResetPolicy;
 import org.niis.xrdkafkaadapter.service.HelperService;
 import org.niis.xrdkafkaadapter.util.Constants;
@@ -54,6 +55,8 @@ public class RestProxyClient implements KafkaClient {
     private static final Logger LOG = LoggerFactory.getLogger(RestProxyClient.class);
 
     private static final String REQUEST_FAILED_ERROR_MESSAGE = "Sending request to REST Proxy failed.";
+
+    private static final String NO_SUBSCRIPTION_FOUND_ERROR = "No subscription found.";
 
     private static final String CONSUMERS_PATH = "/consumers/";
 
@@ -95,7 +98,7 @@ public class RestProxyClient implements KafkaClient {
      * @return
      * @throws RequestFailedException
      */
-    public ClientResponse subscribe(String xrdClientId, String topicName, OffsetResetPolicy offsetResetPolicy)
+    public KafkaClientResponse subscribe(String xrdClientId, String topicName, OffsetResetPolicy offsetResetPolicy)
             throws RequestFailedException {
         // Generate Kafka consumer group and consumer instance names
         String groupName = helperService.getKafkaConsumerGroupName(xrdClientId, topicName);
@@ -124,7 +127,7 @@ public class RestProxyClient implements KafkaClient {
         if (restResponse.getStatusCode() != HttpStatus.SC_OK
                 && restResponse.getStatusCode() != HttpStatus.SC_CONFLICT) {
             LOG.debug("Unable to subscribe to a topic. Status code {} detected.", restResponse.getStatusCode());
-            return restResponse;
+            return new KafkaClientResponse(restResponse.getData());
         }
 
         // Create request object and request target URL
@@ -138,7 +141,7 @@ public class RestProxyClient implements KafkaClient {
         if (restResponse == null) {
             throw new RequestFailedException(REQUEST_FAILED_ERROR_MESSAGE);
         }
-        return restResponse;
+        return new KafkaClientResponse(restResponse.getData());
     }
 
     /**
@@ -152,7 +155,7 @@ public class RestProxyClient implements KafkaClient {
      * @return
      * @throws RequestFailedException
      */
-    public ClientResponse unsubscribe(String xrdClientId, String topicName) throws RequestFailedException, ForbiddenRequestException {
+    public KafkaClientResponse unsubscribe(String xrdClientId, String topicName) throws RequestFailedException, ForbiddenRequestException {
         // Generate Kafka consumer group and consumer instance names
         String groupName = helperService.getKafkaConsumerGroupName(xrdClientId, topicName);
         String instanceName = helperService.getKafkaConsumerInstanceName(xrdClientId);
@@ -176,7 +179,8 @@ public class RestProxyClient implements KafkaClient {
         // Status code 204 (No content) can be ignored. In case of other status code, return the response.
         if (restResponse.getStatusCode() != HttpStatus.SC_NO_CONTENT) {
             LOG.debug("Unable to unsubscribe from a topic. Status code {} detected.", restResponse.getStatusCode());
-            return restResponse;
+            // Most common reason is that subscription doesn't exist
+            throw new ForbiddenRequestException(NO_SUBSCRIPTION_FOUND_ERROR);
         }
 
         // Create request object and request target URL
@@ -188,7 +192,7 @@ public class RestProxyClient implements KafkaClient {
         if (restResponse == null) {
             throw new RequestFailedException(REQUEST_FAILED_ERROR_MESSAGE);
         }
-        return restResponse;
+        return new KafkaClientResponse();
     }
 
     /**
@@ -199,7 +203,7 @@ public class RestProxyClient implements KafkaClient {
      * @return
      * @throws RequestFailedException
      */
-    public ClientResponse read(String xrdClientId, String topicName) throws RequestFailedException, ForbiddenRequestException {
+    public KafkaClientResponse read(String xrdClientId, String topicName) throws RequestFailedException, ForbiddenRequestException {
         // Generate Kafka consumer group and consumer instance names
         String groupName = helperService.getKafkaConsumerGroupName(xrdClientId, topicName);
         String instanceName = helperService.getKafkaConsumerInstanceName(xrdClientId);
@@ -219,7 +223,7 @@ public class RestProxyClient implements KafkaClient {
         if (restResponse == null) {
             throw new RequestFailedException(REQUEST_FAILED_ERROR_MESSAGE);
         }
-        return restResponse;
+        return new KafkaClientResponse(restResponse.getData());
     }
 
     /**
@@ -231,7 +235,7 @@ public class RestProxyClient implements KafkaClient {
      * @return
      * @throws RequestFailedException
      */
-    public ClientResponse publish(String xrdClientId, String topicName, String messageBody)
+    public KafkaClientResponse publish(String xrdClientId, String topicName, String messageBody)
             throws RequestFailedException, BadRequestException {
         // Create request target URL
         String topicsUrl = buildTopicUrl(topicName);
@@ -248,7 +252,7 @@ public class RestProxyClient implements KafkaClient {
         if (restResponse == null) {
             throw new RequestFailedException(REQUEST_FAILED_ERROR_MESSAGE);
         }
-        return restResponse;
+        return new KafkaClientResponse(restResponse.getData());
     }
 
     protected JSONObject buildCreateConsumerInstanceRequest(String instanceName, OffsetResetPolicy offsetResetPolicy) {

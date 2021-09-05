@@ -23,14 +23,13 @@
  */
 package org.niis.xrdkafkaadapter.kafka.client;
 
-import org.niis.xrd4j.rest.ClientResponse;
 import org.niis.xrdkafkaadapter.exception.BadRequestException;
 import org.niis.xrdkafkaadapter.exception.ForbiddenRequestException;
 import org.niis.xrdkafkaadapter.exception.RequestFailedException;
+import org.niis.xrdkafkaadapter.model.KafkaClientResponse;
 import org.niis.xrdkafkaadapter.model.OffsetResetPolicy;
 import org.niis.xrdkafkaadapter.service.HelperService;
 
-import org.apache.http.HttpStatus;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -109,7 +108,7 @@ public class TcpClient implements KafkaClient {
      * @return
      * @throws RequestFailedException
      */
-    public ClientResponse subscribe(String xrdClientId, String topicName, OffsetResetPolicy offsetResetPolicy)
+    public KafkaClientResponse subscribe(String xrdClientId, String topicName, OffsetResetPolicy offsetResetPolicy)
             throws RequestFailedException {
         String groupName = helperService.getKafkaConsumerGroupName(xrdClientId, topicName);
 
@@ -123,7 +122,7 @@ public class TcpClient implements KafkaClient {
         // Subscribe to the topic
         consumerCache.get(groupName).subscribe(Arrays.asList(topicName));
 
-        return new ClientResponse(null, null, HttpStatus.SC_NO_CONTENT, null);
+        return new KafkaClientResponse();
     }
 
     /**
@@ -134,7 +133,7 @@ public class TcpClient implements KafkaClient {
      * @return
      * @throws RequestFailedException
      */
-    public ClientResponse unsubscribe(String xrdClientId, String topicName) throws RequestFailedException, ForbiddenRequestException {
+    public KafkaClientResponse unsubscribe(String xrdClientId, String topicName) throws RequestFailedException, ForbiddenRequestException {
         String groupName = helperService.getKafkaConsumerGroupName(xrdClientId, topicName);
         if (consumerCache.containsKey(groupName)) {
             // Close connection
@@ -142,7 +141,7 @@ public class TcpClient implements KafkaClient {
             // Remove consumer from cache
             consumerCache.remove(groupName);
             LOG.debug("Consumer cache size: {}", consumerCache.size());
-            return new ClientResponse("removed", null, HttpStatus.SC_NO_CONTENT, null);
+            return new KafkaClientResponse();
         }
         LOG.debug("Unable to unsubscribe from topic - no subscription found");
         throw new ForbiddenRequestException(NO_SUBSCRIPTION_FOUND_ERROR);
@@ -156,7 +155,7 @@ public class TcpClient implements KafkaClient {
      * @return
      * @throws RequestFailedException
      */
-    public ClientResponse read(String xrdClientId, String topicName) throws RequestFailedException, ForbiddenRequestException {
+    public KafkaClientResponse read(String xrdClientId, String topicName) throws RequestFailedException, ForbiddenRequestException {
         String groupName = helperService.getKafkaConsumerGroupName(xrdClientId, topicName);
         if (consumerCache.containsKey(groupName)) {
             ConsumerRecords<String, String> records = consumerCache.get(groupName).poll(Duration.ofMillis(POLL_TIMEOUT_MS));
@@ -168,7 +167,7 @@ public class TcpClient implements KafkaClient {
             records.forEach(record -> {
                 response.put(generateReadResultsEntry(record.partition(), record.offset(), topicName, record.key(), record.value()));
             });
-            return new ClientResponse(response.toString(), null, HttpStatus.SC_OK, null);
+            return new KafkaClientResponse(response.toString());
         }
         LOG.debug("Unable to read topic - no subscription found");
         throw new ForbiddenRequestException(NO_SUBSCRIPTION_FOUND_ERROR);
@@ -183,7 +182,7 @@ public class TcpClient implements KafkaClient {
      * @return
      * @throws RequestFailedException
      */
-    public ClientResponse publish(String xrdClientId, String topicName, String messageBody)
+    public KafkaClientResponse publish(String xrdClientId, String topicName, String messageBody)
             throws RequestFailedException, BadRequestException {
         Producer<String, String> producer = new KafkaProducer<>(getProducerProperties(xrdClientId, topicName));
 
@@ -229,7 +228,7 @@ public class TcpClient implements KafkaClient {
             offsets.put(offsetEntry);
         });
         producer.close();
-        return new ClientResponse(response.toString(), null, HttpStatus.SC_OK, null);
+        return new KafkaClientResponse(response.toString());
     }
 
     protected JSONObject generateReadResultsEntry(int partition, long offset, String topic, String key, String value) {

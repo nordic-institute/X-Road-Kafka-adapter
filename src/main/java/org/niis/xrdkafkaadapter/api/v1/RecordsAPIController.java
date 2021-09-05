@@ -23,10 +23,10 @@
  */
 package org.niis.xrdkafkaadapter.api.v1;
 
-import org.niis.xrd4j.rest.ClientResponse;
 import org.niis.xrdkafkaadapter.exception.BadRequestException;
 import org.niis.xrdkafkaadapter.exception.ForbiddenRequestException;
 import org.niis.xrdkafkaadapter.exception.RequestFailedException;
+import org.niis.xrdkafkaadapter.model.KafkaClientResponse;
 import org.niis.xrdkafkaadapter.service.HelperService;
 import org.niis.xrdkafkaadapter.util.Constants;
 
@@ -69,8 +69,8 @@ public class RecordsAPIController extends AbstractAPIController {
         LOG.debug("X-Road-Client: \"{}\"", xrdClientId);
 
         try {
-            ClientResponse response = kafkaClient.read(xrdClientId, topicName);
-            return ResponseEntity.status(response.getStatusCode()).body(response.getData());
+            KafkaClientResponse response = kafkaClient.read(xrdClientId, topicName);
+            return ResponseEntity.status(HttpStatus.OK).body(response.getValue());
         } catch (RequestFailedException e) {
             String msg = helperService.wrapErrorMessageInJson(HttpStatus.GATEWAY_TIMEOUT.value(), e.getMessage());
             return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(msg);
@@ -93,8 +93,8 @@ public class RecordsAPIController extends AbstractAPIController {
         LOG.debug("X-Road-Client: \"{}\"", xrdClientId);
 
         try {
-            ClientResponse response = kafkaClient.publish(xrdClientId, topicName, messageBody);
-            return ResponseEntity.status(response.getStatusCode()).body(response.getData());
+            KafkaClientResponse response = kafkaClient.publish(xrdClientId, topicName, messageBody);
+            return ResponseEntity.status(HttpStatus.OK).body(response.getValue());
         } catch (RequestFailedException e) {
             String msg = helperService.wrapErrorMessageInJson(HttpStatus.GATEWAY_TIMEOUT.value(), e.getMessage());
             return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(msg);

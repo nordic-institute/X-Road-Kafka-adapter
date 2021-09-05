@@ -21,25 +21,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.niis.xrdkafkaadapter.kafka.client;
-
-import org.niis.xrdkafkaadapter.exception.BadRequestException;
-import org.niis.xrdkafkaadapter.exception.ForbiddenRequestException;
-import org.niis.xrdkafkaadapter.exception.RequestFailedException;
-import org.niis.xrdkafkaadapter.model.KafkaClientResponse;
-import org.niis.xrdkafkaadapter.model.OffsetResetPolicy;
+package org.niis.xrdkafkaadapter.model;
 
 /**
- * This interface defines a client interface for Kafka.
+ * This class represents KafkaClient responses.
  */
-public interface KafkaClient {
+public class KafkaClientResponse {
 
-    KafkaClientResponse subscribe(String xrdClientId, String topicName, OffsetResetPolicy offsetResetPolicy)
-            throws RequestFailedException;
+    private String value;
 
-    KafkaClientResponse unsubscribe(String xrdClientId, String topicName) throws RequestFailedException, ForbiddenRequestException;
+    /**
+     * Initialize new KafkaClientResponse object.
+     */
+    public KafkaClientResponse() { }
 
-    KafkaClientResponse read(String xrdClientId, String topicName) throws RequestFailedException, ForbiddenRequestException;
+    /**
+     * Initialize new KafkaClientResponse object with the given value.
+     * @param value
+     */
+    public KafkaClientResponse(String value) {
+        this.value = value;
+    }
 
-    KafkaClientResponse publish(String xrdClientId, String topicName, String messageBody) throws RequestFailedException, BadRequestException;
+    /**
+     * Get value.
+     * @return
+     */
+    public String getValue() {
+        return this.value;
+    }
+
+    /**
+     * Set value.
+     * @param value
+     */
+    public void setValue(String value) {
+        this.value = value;
+    }
+
 }

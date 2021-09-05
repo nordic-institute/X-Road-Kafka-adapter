@@ -23,9 +23,9 @@
  */
 package org.niis.xrdkafkaadapter.api.v1;
 
-import org.niis.xrd4j.rest.ClientResponse;
 import org.niis.xrdkafkaadapter.exception.ForbiddenRequestException;
 import org.niis.xrdkafkaadapter.exception.RequestFailedException;
+import org.niis.xrdkafkaadapter.model.KafkaClientResponse;
 import org.niis.xrdkafkaadapter.model.OffsetResetPolicy;
 import org.niis.xrdkafkaadapter.service.HelperService;
 import org.niis.xrdkafkaadapter.util.Constants;
@@ -70,8 +70,8 @@ public class SubscriptionsAPIController extends AbstractAPIController {
         LOG.debug("X-Road-Client: \"{}\"", xrdClientId);
         LOG.debug("Offset reset policy: \"{}\"", offsetResetPolicy);
         try {
-            ClientResponse response = kafkaClient.subscribe(xrdClientId, topicName, offsetResetPolicy);
-            return ResponseEntity.status(response.getStatusCode()).body(response.getData());
+            KafkaClientResponse response = kafkaClient.subscribe(xrdClientId, topicName, offsetResetPolicy);
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("");
         } catch (RequestFailedException e) {
             String msg = helperService.wrapErrorMessageInJson(HttpStatus.GATEWAY_TIMEOUT.value(), e.getMessage());
             return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(msg);
@@ -89,8 +89,8 @@ public class SubscriptionsAPIController extends AbstractAPIController {
         LOG.info("Unsubscribe from topic \"{}\"", topicName);
         LOG.debug("X-Road-Client: \"{}\"", xrdClientId);
         try {
-            ClientResponse response = kafkaClient.unsubscribe(xrdClientId, topicName);
-            return ResponseEntity.status(response.getStatusCode()).body(response.getData());
+            KafkaClientResponse response = kafkaClient.unsubscribe(xrdClientId, topicName);
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("");
         } catch (RequestFailedException e) {
             String msg = helperService.wrapErrorMessageInJson(HttpStatus.GATEWAY_TIMEOUT.value(), e.getMessage());
             return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(msg);
