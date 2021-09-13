@@ -30,6 +30,10 @@ import org.niis.xrdkafkaadapter.model.KafkaClientResponse;
 import org.niis.xrdkafkaadapter.model.OffsetResetPolicy;
 import org.niis.xrdkafkaadapter.service.HelperService;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.cache.RemovalListener;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -44,13 +48,14 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This class implements a TCP client for Kafka.
@@ -61,6 +66,15 @@ public class TcpClient implements KafkaClient {
     private static final Logger LOG = LoggerFactory.getLogger(TcpClient.class);
 
     private static final int POLL_TIMEOUT_MS = 100;
+
+    // Default (can be overridden in props): 600s = 10min
+    private static final int CONSUMER_CACHE_DURATION_S = 600;
+
+    // 60000ms = 1min
+    private static final int CONSUMER_CACHE_CLEAN_UP_INTERVAL_MS = 60000;
+
+    // 10000ms = 10s
+    private static final int CONSUMER_CACHE_CLEAN_UP_INITIAL_DELAY_MS = 10000;
 
     private static final String ENABLE_AUTO_COMMIT = "true";
 
@@ -79,15 +93,7 @@ public class TcpClient implements KafkaClient {
     @Autowired
     private HelperService helperService;
 
-    // Naive implementation for PoC. Must be replaced with a proper cache.
-    private HashMap<String, KafkaConsumer> consumerCache;
-
-    /**
-     * Initialize new TcpClient object.
-     */
-    public TcpClient() {
-        this.consumerCache = new HashMap<>();
-    }
+    private LoadingCache<String, KafkaConsumer> consumerCache;
 
     /**
      * Initialize new TcpClient object.
@@ -95,8 +101,60 @@ public class TcpClient implements KafkaClient {
      * @param helperService
      */
     public TcpClient(HelperService helperService) {
-        this();
         this.helperService = helperService;
+        int cacheDuration = helperService.getCacheDuration(CONSUMER_CACHE_DURATION_S);
+
+        LOG.debug("Cache duration is {}s", cacheDuration);
+        LOG.debug("Cache clean up initial delay is {}ms", CONSUMER_CACHE_CLEAN_UP_INITIAL_DELAY_MS);
+        LOG.debug("Cache clean up interval is {}ms", CONSUMER_CACHE_CLEAN_UP_INTERVAL_MS);
+
+        /**
+         * The "expireAfterAccess" specifies that each entry should be automatically removed from the cache once a fixed
+         * duration has elapsed after the entry's creation, the most recent replacement of its value, or its
+         * last access. Access time is reset by all cache read and write operations (including Cache.asMap().get(Object)
+         * and Cache.asMap().put(K, V)), but not by operations on the collection-views of Cache.asMap().
+         *
+         * The removalListener method is not called for objects that are automatically removed from cache
+         * because they have expired. For those objects, the removalListener method is invoked only when the cache
+         * cleanUp() method is invoked. Therefore, the cleanUp() is scheduled to be invoked once in a minute. In addition,
+         * cleanUp() is explicitly invoked in subscribe method.
+         *
+         * When cleanUp() is invoked, the connections of all consumers that have been removed from the cache because of
+         * expiration since cleanUp() was invoked the last time, are closed. In other words, when a consumer expires
+         * in the cache, the connection is not closed until cleanUp() is invoked.
+         */
+        consumerCache = CacheBuilder.newBuilder()
+                .expireAfterAccess(cacheDuration, TimeUnit.SECONDS)
+                // N.B. Not invoked automatically when entry expires
+                .removalListener((RemovalListener<String, KafkaConsumer>) entry -> {
+                    KafkaConsumer consumer = entry.getValue();
+                    LOG.debug("Remove consumer \"{}\" from consumer cache", entry.getKey());
+                    if (consumer != null) {
+                        try {
+                            // Close connection
+                            consumer.close();
+                            LOG.debug("Connection closed for consumer object \"{}\"", consumer);
+                        } catch (Throwable e) {
+                            LOG.error("Failed to close Kafka consumer: {}", consumer.getClass().getName(), e);
+                        }
+                    }
+                })
+                .build(new CacheLoader<String, KafkaConsumer>() {
+                    @Override
+                    public KafkaConsumer load(String key) throws ForbiddenRequestException {
+                        throw new ForbiddenRequestException(NO_SUBSCRIPTION_FOUND_ERROR);
+                    }
+                });
+    }
+
+    /**
+     * Perform any pending maintenance operations for consumer cache, e.g., run "removalListener" for expired
+     * cache entries.
+     */
+    @Scheduled(fixedRate = CONSUMER_CACHE_CLEAN_UP_INTERVAL_MS, initialDelay = CONSUMER_CACHE_CLEAN_UP_INITIAL_DELAY_MS)
+    protected void cleanUpCache() {
+        LOG.debug("Clean up consumer cache");
+        consumerCache.cleanUp();
     }
 
     /**
@@ -113,14 +171,17 @@ public class TcpClient implements KafkaClient {
         String groupName = helperService.getKafkaConsumerGroupName(xrdClientId, topicName);
 
         // Check if the consumer already exists in the cache and create a new one if it doesn't
-        if (!consumerCache.containsKey(groupName)) {
+        if (!consumerCache.asMap().containsKey(groupName)) {
+            // Clean up consumer cache in case this consumer has a previous expired consumer instance that has been
+            // removed from cache, but the connection hasn't been closed yet.
+            cleanUpCache();
             LOG.debug("Add new consumer \"{}\" to consumer cache", groupName);
             KafkaConsumer<String, String> consumer = new KafkaConsumer<>(getConsumerProperties(xrdClientId, topicName, offsetResetPolicy));
-            consumerCache.put(groupName, consumer);
+            consumerCache.asMap().put(groupName, consumer);
             LOG.debug("Consumer cache size: {}", consumerCache.size());
         }
         // Subscribe to the topic
-        consumerCache.get(groupName).subscribe(Arrays.asList(topicName));
+        consumerCache.asMap().get(groupName).subscribe(Arrays.asList(topicName));
 
         return new KafkaClientResponse();
     }
@@ -135,11 +196,11 @@ public class TcpClient implements KafkaClient {
      */
     public KafkaClientResponse unsubscribe(String xrdClientId, String topicName) throws RequestFailedException, ForbiddenRequestException {
         String groupName = helperService.getKafkaConsumerGroupName(xrdClientId, topicName);
-        if (consumerCache.containsKey(groupName)) {
-            // Close connection
-            consumerCache.get(groupName).close();
+
+        if (consumerCache.asMap().containsKey(groupName)) {
+            // The connection is closed in the removalListener - no need to close it here
             // Remove consumer from cache
-            consumerCache.remove(groupName);
+            consumerCache.invalidate(groupName);
             LOG.debug("Consumer cache size: {}", consumerCache.size());
             return new KafkaClientResponse();
         }
@@ -157,8 +218,8 @@ public class TcpClient implements KafkaClient {
      */
     public KafkaClientResponse read(String xrdClientId, String topicName) throws RequestFailedException, ForbiddenRequestException {
         String groupName = helperService.getKafkaConsumerGroupName(xrdClientId, topicName);
-        if (consumerCache.containsKey(groupName)) {
-            ConsumerRecords<String, String> records = consumerCache.get(groupName).poll(Duration.ofMillis(POLL_TIMEOUT_MS));
+        if (consumerCache.asMap().containsKey(groupName)) {
+            ConsumerRecords<String, String> records = consumerCache.asMap().get(groupName).poll(Duration.ofMillis(POLL_TIMEOUT_MS));
             LOG.debug("Received {} records from the topic", records.count());
 
             // JSON object for the response

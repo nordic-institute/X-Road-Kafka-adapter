@@ -6,3 +6,6 @@ app:
     rest-proxy-url: http://rest-proxy:8082
     # Defines the Kafka client that the adapter uses: restProxyClient or tcpClient.
     client-qualifier: restProxyClient
+  cache:
+    # The length of time in seconds after an entry is last accessed that it should be automatically removed
+    duration: 600
