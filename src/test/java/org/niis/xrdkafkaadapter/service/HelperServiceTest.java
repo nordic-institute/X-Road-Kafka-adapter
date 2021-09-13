@@ -71,6 +71,27 @@ public class HelperServiceTest extends TestCase {
     }
 
     @Test
+    public void testGetCacheDuration() {
+        Mockito.when(environment.getProperty(Constants.CACHE_DURATION)).thenReturn("600");
+        int cacheDuration = helperService.getCacheDuration(300);
+        Assert.assertEquals(600, cacheDuration);
+    }
+
+    @Test
+    public void testGetCacheDurationNull() {
+        Mockito.when(environment.getProperty(Constants.CACHE_DURATION)).thenReturn(null);
+        int cacheDuration = helperService.getCacheDuration(60);
+        Assert.assertEquals(60, cacheDuration);
+    }
+
+    @Test
+    public void testGetCacheDurationInvalid() {
+        Mockito.when(environment.getProperty(Constants.CACHE_DURATION)).thenReturn("test");
+        int cacheDuration = helperService.getCacheDuration(60);
+        Assert.assertEquals(60, cacheDuration);
+    }
+
+    @Test
     public void testGetKafkaConsumerGroupName() {
         String expected = "PLAYGROUND_ORG_2908758-4_TestClient_MyTopic" + Constants.KAFKA_CONSUMER_GROUP_POSTFIX;
         String clientId = "PLAYGROUND/ORG/2908758-4/TestClient";

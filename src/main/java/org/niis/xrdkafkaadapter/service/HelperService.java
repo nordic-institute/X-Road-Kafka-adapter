@@ -72,6 +72,16 @@ public class HelperService {
     }
 
     /**
+     * Reads the cache duration configuration property value. If the property is not defined, the default value is
+     * used.
+     * @param defaultValue default value that is returned if the property is not defined
+     * @return cache duration property value or the default value
+     */
+    public int getCacheDuration(int defaultValue) {
+        return this.getIntProperty(Constants.CACHE_DURATION, defaultValue);
+    }
+
+    /**
      * Converts X-Road client identifier to Kafka consumer group name using the following pattern:
      * "<instanceIdentifier>/<memberClass>/<memberCode>/<subsystemCode>"
      * =>
@@ -137,5 +147,17 @@ public class HelperService {
      */
     protected String prepareXrdClientId(String xrdClientId) {
         return xrdClientId.replaceAll(XRD_CLIENT_ID_REGEX, XRD_CLIENT_ID_REPLACEMENT);
+    }
+
+    protected int getIntProperty(String propertyName, int defaultValue) {
+        String value = env.getProperty(propertyName);
+        if (value != null) {
+            try {
+                return Integer.parseInt(value);
+            } catch (NumberFormatException e) {
+                return defaultValue;
+            }
+        }
+        return defaultValue;
     }
 }
