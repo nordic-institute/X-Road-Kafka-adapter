@@ -1,5 +1,8 @@
 # X-Road-Kafka Adapter
 
+[![Go to X-Road Community Slack](https://img.shields.io/badge/Go%20to%20Community%20Slack-grey.svg)](https://jointxroad.slack.com/)
+[![Get invited](https://img.shields.io/badge/No%20Slack-Get%20invited-green.svg)](https://x-road.global/community)
+
 X-Road-Kafka Adapter is an adapter component that enables connecting Apache Kafka topics to X-Road. The Adapter 
 supports both producing and consuming data over a simple REST API. The producers publish data to a topic and the consumers
 poll the topic and pull data from it. The Adapter sits between the Security Server and Apache Kafka, and converts 
